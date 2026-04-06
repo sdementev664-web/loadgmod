@@ -24,6 +24,51 @@
     <!-- Particles -->
     <canvas id="particles"></canvas>
 
+    <!-- Audio Player (Hidden) -->
+    <audio id="bg-music" loop>
+        <!-- Добавьте свои музыкальные файлы здесь -->
+        <source src="music/necrograd_theme.mp3" type="audio/mpeg">
+        <source src="music/necrograd_theme.ogg" type="audio/ogg">
+    </audio>
+
+    <!-- Music Control -->
+    <div class="music-control">
+        <button class="music-toggle" id="music-toggle">
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+        </button>
+        <div class="music-info">
+            <div class="music-title" id="music-title">Necrograd Theme</div>
+            <div class="music-artist">Background Music</div>
+        </div>
+        <div class="volume-control">
+            <button class="volume-btn" id="volume-btn">
+                <svg class="volume-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                </svg>
+            </button>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
+            <span class="volume-percent" id="volume-percent">50%</span>
+        </div>
+    </div>
+
+    <!-- Click to Start Overlay -->
+    <div class="start-overlay" id="start-overlay">
+        <div class="start-content">
+            <div class="start-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                </svg>
+            </div>
+            <h2>Добро пожаловать на Necrograd</h2>
+            <p>Нажмите для продолжения</p>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="container">
         
