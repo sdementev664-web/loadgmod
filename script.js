@@ -1,5 +1,5 @@
 // ==========================================
-// NECROGRAD LOADING SCREEN - MINIMAL
+// NECROGRAD LOADING SCREEN - WITH AUDIO
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,7 +7,90 @@ document.addEventListener('DOMContentLoaded', () => {
     initLoadingBar();
     initTips();
     initStats();
+    initVolumeControl();
+    initUnmuteOverlay();
 });
+
+// ==========================================
+// UNMUTE OVERLAY
+// ==========================================
+
+function initUnmuteOverlay() {
+    const overlay = document.getElementById('unmute-overlay');
+    const bgVideo = document.getElementById('bg-video');
+    
+    function unmuteVideo() {
+        overlay.classList.add('hidden');
+        
+        // Send unmute command to YouTube iframe
+        bgVideo.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        bgVideo.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[70]}', '*');
+        
+        localStorage.setItem('necrograd_audio_enabled', 'true');
+    }
+    
+    overlay.addEventListener('click', unmuteVideo);
+    
+    // Auto hide if user already enabled audio before
+    if (localStorage.getItem('necrograd_audio_enabled') === 'true') {
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            bgVideo.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            bgVideo.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[70]}', '*');
+        }, 1000);
+    }
+}
+
+// ==========================================
+// VOLUME CONTROL
+// ==========================================
+
+function initVolumeControl() {
+    const volumeToggle = document.getElementById('volume-toggle');
+    const volumeRange = document.getElementById('volume-range');
+    const volumeValue = document.getElementById('volume-value');
+    const bgVideo = document.getElementById('bg-video');
+    
+    let isMuted = false;
+    let lastVolume = 70;
+    
+    // Toggle mute
+    volumeToggle.addEventListener('click', () => {
+        isMuted = !isMuted;
+        volumeToggle.classList.toggle('muted', isMuted);
+        
+        if (isMuted) {
+            lastVolume = parseInt(volumeRange.value);
+            volumeRange.value = 0;
+            volumeValue.textContent = '0%';
+            bgVideo.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+        } else {
+            volumeRange.value = lastVolume;
+            volumeValue.textContent = lastVolume + '%';
+            bgVideo.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            bgVideo.contentWindow.postMessage(`{"event":"command","func":"setVolume","args":[${lastVolume}]}`, '*');
+        }
+    });
+    
+    // Volume slider
+    volumeRange.addEventListener('input', (e) => {
+        const volume = parseInt(e.target.value);
+        volumeValue.textContent = volume + '%';
+        
+        if (volume === 0) {
+            isMuted = true;
+            volumeToggle.classList.add('muted');
+            bgVideo.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+        } else {
+            if (isMuted) {
+                isMuted = false;
+                volumeToggle.classList.remove('muted');
+                bgVideo.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            }
+            bgVideo.contentWindow.postMessage(`{"event":"command","func":"setVolume","args":[${volume}]}`, '*');
+        }
+    });
+}
 
 // ==========================================
 // PARTICLES
@@ -317,7 +400,6 @@ function initStats() {
 // ==========================================
 
 function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-    // Update server info if needed
     console.log('Server:', servername);
 }
 
