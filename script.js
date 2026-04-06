@@ -1,5 +1,5 @@
 // ==========================================
-// NECROGRAD LOADING SCREEN - MINIMAL
+// NECROGRAD LOADING SCREEN
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,14 +56,10 @@ function initParticles() {
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
             ctx.globalAlpha = this.opacity;
-            ctx.fill();
-            
-            // Glow effect
             ctx.shadowBlur = 15;
             ctx.shadowColor = this.color;
             ctx.fill();
             ctx.shadowBlur = 0;
-            
             ctx.globalAlpha = 1;
         }
     }
@@ -127,73 +123,34 @@ function initLoadingBar() {
         'materials/necrograd/world/ground_01.vtf',
         'materials/necrograd/world/concrete_wall.vmt',
         'materials/necrograd/world/brick_wall_01.vtf',
-        'materials/necrograd/world/metal_floor.vmt',
         'models/necrograd/props/crate_military.mdl',
-        'models/necrograd/props/barrel_explosive.mdl',
         'models/necrograd/vehicles/uaz_469.mdl',
-        'models/necrograd/vehicles/vaz_2106.mdl',
         'materials/necrograd/hud/icons/weapon_ak47.png',
-        'materials/necrograd/hud/icons/weapon_m4a1.png',
-        'materials/necrograd/hud/icons/health_icon.png',
         'sound/necrograd/ambient/city_wind.wav',
-        'sound/necrograd/ambient/night_crickets.wav',
         'sound/necrograd/weapons/ak47_fire1.wav',
-        'sound/necrograd/weapons/ak47_fire2.wav',
-        'sound/necrograd/weapons/reload_rifle.wav',
         'lua/autorun/client/cl_necrograd_hud.lua',
-        'lua/autorun/client/cl_necrograd_scoreboard.lua',
         'lua/autorun/server/sv_necrograd_jobs.lua',
-        'lua/autorun/server/sv_necrograd_economy.lua',
-        'lua/autorun/sh_necrograd_config.lua',
         'models/necrograd/characters/citizen_male_01.mdl',
-        'models/necrograd/characters/citizen_female_01.mdl',
-        'models/necrograd/characters/police_01.mdl',
         'materials/necrograd/skybox/sky_necrograd_up.vtf',
-        'materials/necrograd/skybox/sky_necrograd_dn.vtf',
-        'materials/necrograd/skybox/sky_necrograd_lf.vtf',
-        'materials/necrograd/skybox/sky_necrograd_rt.vtf',
         'sound/necrograd/music/lobby_theme.mp3',
-        'sound/necrograd/music/ambient_01.mp3',
         'models/necrograd/props/barricade_01.mdl',
-        'models/necrograd/props/sandbags_01.mdl',
-        'materials/necrograd/effects/blood_splat_01.vtf',
-        'materials/necrograd/effects/muzzle_flash.vtf',
         'lua/entities/necrograd_atm/init.lua',
-        'lua/entities/necrograd_atm/cl_init.lua',
-        'lua/entities/necrograd_vendor/shared.lua',
-        'models/necrograd/weapons/w_knife_bayonet.mdl',
         'models/necrograd/weapons/w_ak47.mdl',
-        'models/necrograd/weapons/w_m4a1.mdl',
         'materials/necrograd/ui/inventory_bg.png',
-        'materials/necrograd/ui/menu_bg.png',
         'sound/necrograd/ui/click_01.wav',
-        'sound/necrograd/ui/hover_01.wav',
-        'lua/weapons/necrograd_pistol/shared.lua',
-        'lua/weapons/necrograd_rifle/shared.lua',
-        'models/necrograd/furniture/table_wooden.mdl',
-        'models/necrograd/furniture/chair_metal.mdl',
-        'models/necrograd/architecture/building_01.mdl',
-        'models/necrograd/architecture/wall_concrete.mdl',
-        'materials/necrograd/world/road_asphalt.vtf',
-        'materials/necrograd/world/sidewalk_01.vtf',
-        'sound/necrograd/vehicles/engine_idle.wav',
-        'sound/necrograd/vehicles/engine_start.wav',
-        'materials/necrograd/characters/uniform_police.vtf',
-        'materials/necrograd/characters/uniform_medic.vtf'
+        'lua/autorun/sh_necrograd_config.lua',
+        'models/necrograd/architecture/building_01.mdl'
     ];
     
     const statuses = [
         { at: 0, text: 'Подключение к серверу...' },
-        { at: 3, text: 'Установка соединения...' },
-        { at: 8, text: 'Получение информации о сервере...' },
+        { at: 5, text: 'Получение информации о сервере...' },
         { at: 12, text: 'Загрузка материалов...' },
-        { at: 30, text: 'Загрузка текстур окружения...' },
-        { at: 42, text: 'Загрузка 3D моделей...' },
-        { at: 58, text: 'Загрузка звуковых файлов...' },
-        { at: 68, text: 'Загрузка скриптов Lua...' },
-        { at: 78, text: 'Загрузка карты...' },
-        { at: 88, text: 'Инициализация клиента...' },
-        { at: 95, text: 'Синхронизация данных...' },
+        { at: 35, text: 'Загрузка моделей...' },
+        { at: 55, text: 'Загрузка звуков...' },
+        { at: 70, text: 'Загрузка скриптов Lua...' },
+        { at: 85, text: 'Загрузка карты...' },
+        { at: 95, text: 'Инициализация...' },
         { at: 99, text: 'Отправка клиентской информации...' }
     ];
     
@@ -210,7 +167,6 @@ function initLoadingBar() {
         loadingPercent.textContent = currentPercent + '%';
         filesCount.textContent = currentFiles + ' / ' + totalFiles;
         
-        // Update status text
         for (let i = statuses.length - 1; i >= 0; i--) {
             if (progress >= statuses[i].at) {
                 if (progress > 12) {
@@ -225,11 +181,9 @@ function initLoadingBar() {
             }
         }
         
-        // Random speed
         const speed = (1.8 + Math.random() * 3.2).toFixed(1);
         downloadSpeed.textContent = speed + ' MB/s';
         
-        // Random ping
         const ping = Math.floor(22 + Math.random() * 35);
         pingValue.textContent = ping + ' ms';
         
@@ -242,7 +196,6 @@ function initLoadingBar() {
             filesCount.textContent = totalFiles + ' / ' + totalFiles;
             downloadSpeed.textContent = '0.0 MB/s';
             
-            // Restart for demo
             setTimeout(() => {
                 progress = 0;
                 fileIndex = 0;
@@ -256,7 +209,7 @@ function initLoadingBar() {
 }
 
 // ==========================================
-// TIPS ROTATION
+// TIPS
 // ==========================================
 
 function initTips() {
@@ -266,18 +219,16 @@ function initTips() {
         'Нажмите F1, чтобы открыть меню помощи на сервере',
         'Используйте /me для описания ваших действий в RP',
         'Зажмите ALT для голосового чата ближнего действия',
-        'Посетите наш Discord для актуальных новостей и обновлений',
-        'Не забудьте прочитать правила сервера перед началом игры',
-        'Нажмите F4 для открытия меню работ и профессий',
-        'Используйте /report для обращения к администрации сервера',
-        'Экономьте деньги и покупайте недвижимость в игре',
+        'Посетите наш Discord для актуальных новостей',
+        'Не забудьте прочитать правила сервера',
+        'Нажмите F4 для открытия меню работ',
+        'Используйте /report для обращения к администрации',
+        'Экономьте деньги и покупайте недвижимость',
         'Вступите в организацию для совместного геймплея',
-        'Нажмите TAB для просмотра списка игроков онлайн',
+        'Нажмите TAB для просмотра списка игроков',
         'Соблюдайте правило новой жизни (NLR) - 3 минуты',
         'Запрещено убийство без RP причины (RDM)',
-        'Цените свою жизнь в игре - соблюдайте FearRP',
-        'Взаимодействуйте с другими игроками в ролевых ситуациях',
-        'Используйте /advert для публичных объявлений'
+        'Цените свою жизнь в игре - соблюдайте FearRP'
     ];
     
     let currentTip = 0;
@@ -296,7 +247,7 @@ function initTips() {
 }
 
 // ==========================================
-// STATS UPDATE
+// STATS
 // ==========================================
 
 function initStats() {
@@ -313,13 +264,10 @@ function initStats() {
 }
 
 // ==========================================
-// GMOD INTEGRATION
+// GMOD API
 // ==========================================
 
-function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-    // Update server info if needed
-    console.log('Server:', servername);
-}
+function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {}
 
 function SetFilesTotal(total) {
     window.totalFiles = total;
