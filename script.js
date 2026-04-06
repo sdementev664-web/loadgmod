@@ -1,5 +1,5 @@
 // ==========================================
-// NECROGRAD LOADING SCREEN
+// NECROGRAD LOADING SCREEN - WITH MUSIC
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,7 +7,93 @@ document.addEventListener('DOMContentLoaded', () => {
     initLoadingBar();
     initTips();
     initStats();
+    initMusicPlayer();
 });
+
+// ==========================================
+// MUSIC PLAYER
+// ==========================================
+
+function initMusicPlayer() {
+    const audio = document.getElementById('bg-music');
+    const musicToggle = document.getElementById('music-toggle');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumePercent = document.getElementById('volume-percent');
+    const volumeBtn = document.getElementById('volume-btn');
+    const startOverlay = document.getElementById('start-overlay');
+    const musicControl = document.querySelector('.music-control');
+    
+    let isPlaying = false;
+    let lastVolume = 50;
+    
+    // Установка начальной громкости
+    audio.volume = 0.5;
+    
+    // Обработка начального overlay
+    function startMusic() {
+        startOverlay.classList.add('hidden');
+        musicControl.classList.add('visible');
+        
+        audio.play().then(() => {
+            isPlaying = true;
+            musicToggle.classList.add('playing');
+        }).catch(err => {
+            console.log('Autoplay prevented:', err);
+        });
+    }
+    
+    startOverlay.addEventListener('click', startMusic);
+    
+    // Toggle play/pause
+    musicToggle.addEventListener('click', () => {
+        if (isPlaying) {
+            audio.pause();
+            musicToggle.classList.remove('playing');
+            isPlaying = false;
+        } else {
+            audio.play();
+            musicToggle.classList.add('playing');
+            isPlaying = true;
+        }
+    });
+    
+    // Volume slider
+    volumeSlider.addEventListener('input', (e) => {
+        const volume = parseInt(e.target.value);
+        audio.volume = volume / 100;
+        volumePercent.textContent = volume + '%';
+        
+        if (volume > 0) {
+            lastVolume = volume;
+        }
+    });
+    
+    // Volume button (mute/unmute)
+    volumeBtn.addEventListener('click', () => {
+        if (audio.volume > 0) {
+            lastVolume = parseInt(volumeSlider.value);
+            audio.volume = 0;
+            volumeSlider.value = 0;
+            volumePercent.textContent = '0%';
+        } else {
+            audio.volume = lastVolume / 100;
+            volumeSlider.value = lastVolume;
+            volumePercent.textContent = lastVolume + '%';
+        }
+    });
+    
+    // Автостарт если пользователь уже давал разрешение
+    if (localStorage.getItem('necrograd_music_started') === 'true') {
+        setTimeout(() => {
+            startMusic();
+        }, 500);
+    }
+    
+    // Сохранить что пользователь запустил музыку
+    startOverlay.addEventListener('click', () => {
+        localStorage.setItem('necrograd_music_started', 'true');
+    });
+}
 
 // ==========================================
 // PARTICLES
