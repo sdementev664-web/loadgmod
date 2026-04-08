@@ -1,389 +1,836 @@
-// ==========================================
-// NECROGRAD LOADING SCREEN - WITH MUSIC
-// ==========================================
+/* ==========================================
+   VARIABLES
+   ========================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
-    initParticles();
-    initLoadingBar();
-    initTips();
-    initStats();
-    initMusicPlayer();
-});
-
-// ==========================================
-// MUSIC PLAYER
-// ==========================================
-
-function initMusicPlayer() {
-    const audio = document.getElementById('bg-music');
-    const musicToggle = document.getElementById('music-toggle');
-    const volumeSlider = document.getElementById('volume-slider');
-    const volumePercent = document.getElementById('volume-percent');
-    const volumeBtn = document.getElementById('volume-btn');
-    const startOverlay = document.getElementById('start-overlay');
-    const musicControl = document.querySelector('.music-control');
-    
-    let isPlaying = false;
-    let lastVolume = 50;
-    
-    // Установка начальной громкости
-    audio.volume = 0.5;
-    
-    // Обработка начального overlay
-    function startMusic() {
-        startOverlay.classList.add('hidden');
-        musicControl.classList.add('visible');
-        
-        audio.play().then(() => {
-            isPlaying = true;
-            musicToggle.classList.add('playing');
-        }).catch(err => {
-            console.log('Autoplay prevented:', err);
-        });
-    }
-    
-    startOverlay.addEventListener('click', startMusic);
-    
-    // Toggle play/pause
-    musicToggle.addEventListener('click', () => {
-        if (isPlaying) {
-            audio.pause();
-            musicToggle.classList.remove('playing');
-            isPlaying = false;
-        } else {
-            audio.play();
-            musicToggle.classList.add('playing');
-            isPlaying = true;
-        }
-    });
-    
-    // Volume slider
-    volumeSlider.addEventListener('input', (e) => {
-        const volume = parseInt(e.target.value);
-        audio.volume = volume / 100;
-        volumePercent.textContent = volume + '%';
-        
-        if (volume > 0) {
-            lastVolume = volume;
-        }
-    });
-    
-    // Volume button (mute/unmute)
-    volumeBtn.addEventListener('click', () => {
-        if (audio.volume > 0) {
-            lastVolume = parseInt(volumeSlider.value);
-            audio.volume = 0;
-            volumeSlider.value = 0;
-            volumePercent.textContent = '0%';
-        } else {
-            audio.volume = lastVolume / 100;
-            volumeSlider.value = lastVolume;
-            volumePercent.textContent = lastVolume + '%';
-        }
-    });
-    
-    // Автостарт если пользователь уже давал разрешение
-    if (localStorage.getItem('necrograd_music_started') === 'true') {
-        setTimeout(() => {
-            startMusic();
-        }, 500);
-    }
-    
-    // Сохранить что пользователь запустил музыку
-    startOverlay.addEventListener('click', () => {
-        localStorage.setItem('necrograd_music_started', 'true');
-    });
+:root {
+    --bg-dark: #030712;
+    --bg-card: rgba(15, 23, 42, 0.7);
+    --border: rgba(148, 163, 184, 0.1);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --primary: #0ea5e9;
+    --primary-dark: #0284c7;
+    --primary-glow: rgba(14, 165, 233, 0.4);
+    --success: #10b981;
+    --danger: #ef4444;
 }
 
-// ==========================================
-// PARTICLES
-// ==========================================
+/* ==========================================
+   GLOBAL
+   ========================================== */
 
-function initParticles() {
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-    
-    let particles = [];
-    const particleCount = 60;
-    
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    
-    resize();
-    window.addEventListener('resize', resize);
-    
-    class Particle {
-        constructor() {
-            this.reset();
-        }
-        
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2.5 + 0.5;
-            this.speedX = (Math.random() - 0.5) * 0.6;
-            this.speedY = (Math.random() - 0.5) * 0.6;
-            this.opacity = Math.random() * 0.5 + 0.2;
-            this.color = Math.random() > 0.5 ? '#0ea5e9' : '#06b6d4';
-        }
-        
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            
-            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.globalAlpha = this.opacity;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-        }
-    }
-    
-    for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-    }
-    
-    function connectParticles() {
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < 120) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = '#0ea5e9';
-                    ctx.globalAlpha = 0.15 * (1 - distance / 120);
-                    ctx.lineWidth = 1;
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.stroke();
-                    ctx.globalAlpha = 1;
-                }
-            }
-        }
-    }
-    
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        particles.forEach(particle => {
-            particle.update();
-            particle.draw();
-        });
-        
-        connectParticles();
-        requestAnimationFrame(animate);
-    }
-    
-    animate();
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// ==========================================
-// LOADING BAR
-// ==========================================
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
 
-function initLoadingBar() {
-    const progressBar = document.getElementById('progress-bar');
-    const loadingPercent = document.getElementById('loading-percent');
-    const filesCount = document.getElementById('files-count');
-    const loadingFile = document.getElementById('loading-file');
-    const downloadSpeed = document.getElementById('download-speed');
-    const pingValue = document.getElementById('ping-value');
-    
-    let progress = 0;
-    const totalFiles = 347;
-    
-    const files = [
-        'materials/necrograd/world/ground_01.vtf',
-        'materials/necrograd/world/concrete_wall.vmt',
-        'materials/necrograd/world/brick_wall_01.vtf',
-        'models/necrograd/props/crate_military.mdl',
-        'models/necrograd/vehicles/uaz_469.mdl',
-        'materials/necrograd/hud/icons/weapon_ak47.png',
-        'sound/necrograd/ambient/city_wind.wav',
-        'sound/necrograd/weapons/ak47_fire1.wav',
-        'lua/autorun/client/cl_necrograd_hud.lua',
-        'lua/autorun/server/sv_necrograd_jobs.lua',
-        'models/necrograd/characters/citizen_male_01.mdl',
-        'materials/necrograd/skybox/sky_necrograd_up.vtf',
-        'sound/necrograd/music/lobby_theme.mp3',
-        'models/necrograd/props/barricade_01.mdl',
-        'lua/entities/necrograd_atm/init.lua',
-        'models/necrograd/weapons/w_ak47.mdl',
-        'materials/necrograd/ui/inventory_bg.png',
-        'sound/necrograd/ui/click_01.wav',
-        'lua/autorun/sh_necrograd_config.lua',
-        'models/necrograd/architecture/building_01.mdl'
-    ];
-    
-    const statuses = [
-        { at: 0, text: 'Подключение к серверу...' },
-        { at: 5, text: 'Получение информации о сервере...' },
-        { at: 12, text: 'Загрузка материалов...' },
-        { at: 35, text: 'Загрузка моделей...' },
-        { at: 55, text: 'Загрузка звуков...' },
-        { at: 70, text: 'Загрузка скриптов Lua...' },
-        { at: 85, text: 'Загрузка карты...' },
-        { at: 95, text: 'Инициализация...' },
-        { at: 99, text: 'Отправка клиентской информации...' }
-    ];
-    
-    let fileIndex = 0;
-    
-    function updateProgress() {
-        const increment = Math.random() * 1.2 + 0.3;
-        progress = Math.min(progress + increment, 100);
-        
-        const currentPercent = Math.floor(progress);
-        const currentFiles = Math.floor((progress / 100) * totalFiles);
-        
-        progressBar.style.width = progress + '%';
-        loadingPercent.textContent = currentPercent + '%';
-        filesCount.textContent = currentFiles + ' / ' + totalFiles;
-        
-        for (let i = statuses.length - 1; i >= 0; i--) {
-            if (progress >= statuses[i].at) {
-                if (progress > 12) {
-                    loadingFile.textContent = files[fileIndex];
-                    if (Math.random() > 0.7) {
-                        fileIndex = (fileIndex + 1) % files.length;
-                    }
-                } else {
-                    loadingFile.textContent = statuses[i].text;
-                }
-                break;
-            }
-        }
-        
-        const speed = (1.8 + Math.random() * 3.2).toFixed(1);
-        downloadSpeed.textContent = speed + ' MB/s';
-        
-        const ping = Math.floor(22 + Math.random() * 35);
-        pingValue.textContent = ping + ' ms';
-        
-        if (progress < 100) {
-            const delay = 100 + Math.random() * 250;
-            setTimeout(updateProgress, delay);
-        } else {
-            loadingFile.textContent = 'Загрузка завершена! Входим на сервер...';
-            loadingPercent.textContent = '100%';
-            filesCount.textContent = totalFiles + ' / ' + totalFiles;
-            downloadSpeed.textContent = '0.0 MB/s';
-            
-            setTimeout(() => {
-                progress = 0;
-                fileIndex = 0;
-                progressBar.style.width = '0%';
-                updateProgress();
-            }, 5000);
-        }
+/* ==========================================
+   GIF BACKGROUND
+   ========================================== */
+
+.gif-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.gif-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.4) contrast(1.1);
+}
+
+.gif-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(3, 7, 18, 0.3) 0%,
+        rgba(3, 7, 18, 0.6) 50%,
+        rgba(3, 7, 18, 0.85) 100%
+    );
+    pointer-events: none;
+}
+
+/* Дополнительный эффект виньетки */
+.gif-background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        rgba(3, 7, 18, 0.4) 70%,
+        rgba(3, 7, 18, 0.8) 100%
+    );
+    pointer-events: none;
+}
+
+/* ==========================================
+   PARTICLES
+   ========================================== */
+
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ==========================================
+   CONTAINER
+   ========================================== */
+
+.container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    padding: 50px;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeSlideDown 0.8s ease-out;
+}
+
+@keyframes fadeSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
     }
-    
-    setTimeout(updateProgress, 1500);
-}
-
-// ==========================================
-// TIPS
-// ==========================================
-
-function initTips() {
-    const tipText = document.getElementById('tip-text');
-    
-    const tips = [
-        'Нажмите F1, чтобы открыть меню помощи на сервере',
-        'Используйте /me для описания ваших действий в RP',
-        'Зажмите ALT для голосового чата ближнего действия',
-        'Посетите наш Discord для актуальных новостей',
-        'Не забудьте прочитать правила сервера',
-        'Нажмите F4 для открытия меню работ',
-        'Используйте /report для обращения к администрации',
-        'Экономьте деньги и покупайте недвижимость',
-        'Вступите в организацию для совместного геймплея',
-        'Нажмите TAB для просмотра списка игроков',
-        'Соблюдайте правило новой жизни (NLR) - 3 минуты',
-        'Запрещено убийство без RP причины (RDM)',
-        'Цените свою жизнь в игре - соблюдайте FearRP'
-    ];
-    
-    let currentTip = 0;
-    
-    function showNextTip() {
-        tipText.style.opacity = '0';
-        
-        setTimeout(() => {
-            currentTip = (currentTip + 1) % tips.length;
-            tipText.textContent = tips[currentTip];
-            tipText.style.opacity = '1';
-        }, 500);
-    }
-    
-    setInterval(showNextTip, 7000);
-}
-
-// ==========================================
-// STATS
-// ==========================================
-
-function initStats() {
-    const playersCount = document.getElementById('players-count');
-    
-    function updateStats() {
-        let current = parseInt(playersCount.textContent);
-        const change = Math.floor(Math.random() * 5) - 2;
-        current = Math.max(35, Math.min(128, current + change));
-        playersCount.textContent = current;
-    }
-    
-    setInterval(updateStats, 6000);
-}
-
-// ==========================================
-// GMOD API
-// ==========================================
-
-function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {}
-
-function SetFilesTotal(total) {
-    window.totalFiles = total;
-}
-
-function SetFilesNeeded(needed) {
-    if (window.totalFiles) {
-        const downloaded = window.totalFiles - needed;
-        const percent = Math.floor((downloaded / window.totalFiles) * 100);
-        
-        const progressBar = document.getElementById('progress-bar');
-        const loadingPercent = document.getElementById('loading-percent');
-        const filesCount = document.getElementById('files-count');
-        
-        if (progressBar) progressBar.style.width = percent + '%';
-        if (loadingPercent) loadingPercent.textContent = percent + '%';
-        if (filesCount) filesCount.textContent = downloaded + ' / ' + window.totalFiles;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-function DownloadingFile(fileName) {
-    const loadingFile = document.getElementById('loading-file');
-    if (loadingFile && fileName) {
-        loadingFile.textContent = fileName;
+.server-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    backdrop-filter: blur(20px);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
     }
 }
 
-function SetStatusChanged(status) {
-    const loadingFile = document.getElementById('loading-file');
-    if (loadingFile && status) {
-        loadingFile.textContent = status;
+.status-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--success);
+}
+
+.header-stats {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    backdrop-filter: blur(20px);
+}
+
+.header-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.header-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.header-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+}
+
+/* ==========================================
+   MAIN / LOGO
+   ========================================== */
+
+.main-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.logo-section {
+    text-align: center;
+    position: relative;
+    animation: fadeScale 1s ease-out 0.2s both;
+}
+
+@keyframes fadeScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.logo-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    filter: blur(60px);
+    animation: glowPulse 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+.logo {
+    font-size: 90px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    line-height: 1;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.logo-text {
+    display: inline-block;
+    background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 80px rgba(255, 255, 255, 0.3);
+}
+
+.logo-text.accent {
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px var(--primary-glow));
+}
+
+.logo-tagline {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* ==========================================
+   FOOTER / LOADING
+   ========================================== */
+
+.footer {
+    animation: fadeSlideUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loading-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(20px);
+    margin-bottom: 20px;
+}
+
+.loading-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.loading-status {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.loading-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+}
+
+.loading-percentage {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary);
+    font-family: 'Roboto Mono', monospace;
+}
+
+.loading-file {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Roboto Mono', monospace;
+    max-width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.progress-container {
+    height: 8px;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.progress-glow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.loading-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.detail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Roboto Mono', monospace;
+}
+
+/* ==========================================
+   TIP SECTION
+   ========================================== */
+
+.tip-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 26px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+}
+
+.tip-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.tip-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    transition: opacity 0.5s ease;
+}
+
+/* ==========================================
+   START OVERLAY
+   ========================================== */
+
+.start-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 7, 18, 0.98);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.start-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.start-content {
+    text-align: center;
+    animation: fadeInScale 0.8s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.start-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulseStart 2s ease-in-out infinite;
+    box-shadow: 0 0 80px var(--primary-glow);
+}
+
+@keyframes pulseStart {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 80px var(--primary-glow);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 100px var(--primary-glow), 0 0 150px rgba(14, 165, 233, 0.3);
+    }
+}
+
+.start-icon svg {
+    width: 60px;
+    height: 60px;
+    color: white;
+}
+
+.start-content h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    letter-spacing: 2px;
+}
+
+.start-content p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ==========================================
+   MUSIC CONTROL
+   ========================================== */
+
+.music-control {
+    position: fixed;
+    left: 50px;
+    bottom: 180px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 60px;
+    backdrop-filter: blur(20px);
+    animation: fadeSlideUp 0.8s ease-out 0.6s both;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.music-control.visible {
+    opacity: 1;
+}
+
+.music-toggle {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.music-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 30px var(--primary-glow);
+}
+
+.music-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.music-toggle.playing .icon-play {
+    display: none;
+}
+
+.music-toggle.playing .icon-pause {
+    display: block !important;
+}
+
+.music-info {
+    min-width: 140px;
+}
+
+.music-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.music-artist {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.volume-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.volume-btn:hover {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--primary);
+}
+
+.volume-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.volume-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary-glow);
+    transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.volume-percent {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 40px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .container {
+        padding: 30px;
+    }
+
+    .logo {
+        font-size: 70px;
+    }
+
+    .music-control {
+        left: 30px;
+        bottom: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .header-stats {
+        justify-content: center;
+    }
+
+    .logo {
+        font-size: 50px;
+        letter-spacing: 4px;
+    }
+
+    .logo-tagline {
+        font-size: 12px;
+        letter-spacing: 3px;
+    }
+
+    .loading-section {
+        padding: 20px;
+    }
+
+    .loading-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .loading-details {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .music-control {
+        position: relative;
+        left: 0;
+        bottom: 0;
+        margin-bottom: 15px;
+        width: 100%;
+        border-radius: 16px;
+        justify-content: space-between;
+    }
+
+    .music-info {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 36px;
+    }
+
+    .logo-tagline {
+        font-size: 10px;
+    }
+
+    .loading-percentage {
+        font-size: 22px;
+    }
+
+    .loading-details {
+        grid-template-columns: 1fr;
+    }
+
+    .header-stat-value {
+        font-size: 20px;
+    }
+
+    .music-control {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .volume-control {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .start-content h2 {
+        font-size: 26px;
+    }
+
+    .start-content p {
+        font-size: 14px;
+    }
+
+    .start-icon {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 25px;
+    }
+
+    .start-icon svg {
+        width: 45px;
+        height: 45px;
     }
 }
