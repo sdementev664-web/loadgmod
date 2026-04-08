@@ -1,297 +1,381 @@
-/* Добавьте эти стили к существующему style.css */
+// ==================== PARTICLES ANIMATION ====================
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
 
-/* ==========================================
-   START OVERLAY
-   ========================================== */
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-.start-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(3, 7, 18, 0.98);
-    backdrop-filter: blur(10px);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-}
+const particles = [];
+const particleCount = 100;
 
-.start-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.start-content {
-    text-align: center;
-    animation: fadeInScale 0.8s ease-out;
-}
-
-@keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
+class Particle {
+    constructor() {
+        this.reset();
     }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
+    
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.2;
+    }
+    
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    
+    draw() {
+        ctx.fillStyle = `rgba(0, 217, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
-.start-icon {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 40px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pulseStart 2s ease-in-out infinite;
-    box-shadow: 0 0 80px var(--primary-glow);
+for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
 }
 
-@keyframes pulseStart {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 80px var(--primary-glow);
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+    
+    requestAnimationFrame(animateParticles);
+}
+
+animateParticles();
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+// ==================== MUSIC PLAYER ====================
+const bgMusic = document.getElementById('bg-music');
+const musicToggle = document.getElementById('music-toggle');
+const iconPlay = musicToggle.querySelector('.icon-play');
+const iconPause = musicToggle.querySelector('.icon-pause');
+const volumeSlider = document.getElementById('volume-slider');
+const volumePercent = document.getElementById('volume-percent');
+const startOverlay = document.getElementById('start-overlay');
+const gifBg = document.getElementById('gif-bg');
+
+let isMusicPlaying = false;
+let isStarted = false;
+
+// Set initial volume
+bgMusic.volume = 0.5;
+
+// ==================== AUTO START FUNCTION ====================
+function autoStartExperience() {
+    if (isStarted) return;
+    isStarted = true;
+    
+    // Скрываем overlay
+    startOverlay.classList.add('hidden');
+    
+    // Запускаем музыку
+    playMusic();
+    
+    // Перезапускаем GIF (на случай если он завис)
+    const gifSrc = gifBg.src;
+    gifBg.src = '';
+    gifBg.src = gifSrc;
+    
+    // Запускаем загрузку
+    startLoading();
+    
+    console.log('🎬 GIF и музыка запущены автоматически!');
+}
+
+// ==================== START OVERLAY CLICK ====================
+startOverlay.addEventListener('click', autoStartExperience);
+
+// ==================== KEYBOARD START (ENTER или SPACE) ====================
+document.addEventListener('keydown', (e) => {
+    if (!isStarted && (e.code === 'Enter' || e.code === 'Space')) {
+        e.preventDefault();
+        autoStartExperience();
     }
-    50% {
-        transform: scale(1.08);
-        box-shadow: 0 0 100px var(--primary-glow), 0 0 150px rgba(14, 165, 233, 0.3);
+});
+
+// ==================== MUSIC FUNCTIONS ====================
+function playMusic() {
+    bgMusic.play()
+        .then(() => {
+            isMusicPlaying = true;
+            iconPlay.style.display = 'none';
+            iconPause.style.display = 'block';
+            console.log('🎵 Музыка запущена');
+        })
+        .catch(err => {
+            console.log('⚠️ Ошибка автозапуска музыки:', err);
+            console.log('💡 Нажмите на экран для запуска музыки');
+        });
+}
+
+function pauseMusic() {
+    bgMusic.pause();
+    isMusicPlaying = false;
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+}
+
+musicToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isMusicPlaying) {
+        pauseMusic();
+    } else {
+        playMusic();
     }
-}
+});
 
-.start-icon svg {
-    width: 60px;
-    height: 60px;
-    color: white;
-}
+volumeSlider.addEventListener('input', (e) => {
+    const volume = e.target.value / 100;
+    bgMusic.volume = volume;
+    volumePercent.textContent = `${e.target.value}%`;
+});
 
-.start-content h2 {
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--text-primary);
-    letter-spacing: 2px;
-}
-
-.start-content p {
-    font-size: 18px;
-    color: var(--text-secondary);
-    animation: blink 2s ease-in-out infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-/* ==========================================
-   MUSIC CONTROL
-   ========================================== */
-
-.music-control {
-    position: fixed;
-    left: 50px;
-    bottom: 180px;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 20px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 60px;
-    backdrop-filter: blur(20px);
-    animation: fadeSlideUp 0.8s ease-out 0.6s both;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.music-control.visible {
-    opacity: 1;
-}
-
-.music-toggle {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.music-toggle:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 30px var(--primary-glow);
-}
-
-.music-toggle svg {
-    width: 20px;
-    height: 20px;
-}
-
-.music-toggle.playing .icon-play {
-    display: none;
-}
-
-.music-toggle.playing .icon-pause {
-    display: block !important;
-}
-
-.music-info {
-    min-width: 140px;
-}
-
-.music-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 3px;
-}
-
-.music-artist {
-    font-size: 11px;
-    color: var(--text-secondary);
-}
-
-.volume-control {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.volume-btn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.volume-btn:hover {
-    background: rgba(14, 165, 233, 0.1);
-    color: var(--primary);
-}
-
-.volume-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-.volume-slider {
-    width: 80px;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-
-.volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--primary);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 10px var(--primary-glow);
-    transition: all 0.2s ease;
-}
-
-.volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-}
-
-.volume-slider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: var(--primary);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 0 10px var(--primary-glow);
-}
-
-.volume-percent {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 40px;
-    font-family: 'Roboto Mono', monospace;
-}
-
-/* Responsive для музыкального контроллера */
-@media (max-width: 1024px) {
-    .music-control {
-        left: 30px;
-        bottom: 160px;
+// ==================== GIF AUTO-RELOAD ====================
+// Перезапуск GIF каждые 10 секунд для гарантии воспроизведения
+setInterval(() => {
+    if (isStarted) {
+        const currentSrc = gifBg.src;
+        gifBg.src = '';
+        setTimeout(() => {
+            gifBg.src = currentSrc;
+        }, 10);
     }
+}, 10000);
+
+// ==================== LOADING ANIMATION ====================
+const loadingPercent = document.getElementById('loading-percent');
+const loadingFile = document.getElementById('loading-file');
+const progressBar = document.getElementById('progress-bar');
+const filesCount = document.getElementById('files-count');
+const downloadSpeed = document.getElementById('download-speed');
+const pingValue = document.getElementById('ping-value');
+const playersCount = document.getElementById('players-count');
+
+const files = [
+    'models/city_buildings.mdl',
+    'materials/textures/roads.vtf',
+    'sound/ambient/wind.wav',
+    'scripts/game_sounds.txt',
+    'maps/necrograd_downtown.bsp',
+    'models/vehicles/police_car.mdl',
+    'materials/textures/graffiti.vtf',
+    'sound/weapons/gunshot.wav',
+    'scripts/npc_ai.lua',
+    'models/props/streetlight.mdl',
+    'materials/skybox/night_sky.vtf',
+    'sound/music/background_01.mp3',
+    'scripts/player_animations.txt',
+    'models/characters/citizen_male.mdl',
+    'materials/textures/concrete.vtf',
+    'sound/ambient/rain.wav',
+    'scripts/weapons_config.lua',
+    'models/props/trash_bin.mdl',
+    'materials/effects/blood_splatter.vtf',
+    'sound/npc/dialogue_01.wav',
+    'Финализация...'
+];
+
+let currentProgress = 0;
+let currentFileIndex = 0;
+let loadingInterval;
+
+function startLoading() {
+    loadingInterval = setInterval(() => {
+        if (currentProgress < 100) {
+            // Увеличиваем прогресс случайным образом (более реалистично)
+            const increment = Math.random() * 2.5 + 0.5;
+            currentProgress = Math.min(currentProgress + increment, 100);
+            
+            // Обновляем визуальные элементы
+            progressBar.style.width = currentProgress + '%';
+            loadingPercent.textContent = Math.floor(currentProgress) + '%';
+            
+            // Обновляем файлы
+            const targetFileIndex = Math.floor((currentProgress / 100) * files.length);
+            if (currentFileIndex < targetFileIndex && targetFileIndex < files.length) {
+                currentFileIndex = targetFileIndex;
+                loadingFile.textContent = files[currentFileIndex];
+            }
+            
+            filesCount.textContent = `${Math.floor((currentProgress / 100) * 347)} / 347`;
+            
+            // Случайная скорость загрузки (снижается к концу)
+            const speedMultiplier = 1 - (currentProgress / 200);
+            downloadSpeed.textContent = (Math.random() * 8 * speedMultiplier + 2).toFixed(1) + ' MB/s';
+            
+            // Случайный пинг
+            pingValue.textContent = Math.floor(Math.random() * 30 + 15) + ' ms';
+            
+            // Имитация изменения количества игроков
+            if (Math.random() > 0.97) {
+                const currentPlayers = parseInt(playersCount.textContent);
+                const change = Math.random() > 0.5 ? 1 : -1;
+                playersCount.textContent = Math.max(50, Math.min(70, currentPlayers + change));
+            }
+            
+        } else {
+            clearInterval(loadingInterval);
+            loadingFile.textContent = '✓ Загрузка завершена!';
+            downloadSpeed.textContent = '0.0 MB/s';
+            
+            setTimeout(() => {
+                showCompletionMessage();
+            }, 500);
+        }
+    }, 100);
 }
 
-@media (max-width: 768px) {
-    .music-control {
-        position: relative;
-        left: 0;
-        bottom: 0;
-        margin-bottom: 15px;
-        width: 100%;
+function showCompletionMessage() {
+    // Создаём красивое уведомление о завершении
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 40px 60px;
         border-radius: 16px;
-        justify-content: space-between;
-    }
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 0 50px var(--glow-primary);
+        z-index: 10000;
+        text-align: center;
+        animation: fadeInScale 0.5s ease;
+    `;
     
-    .music-info {
-        flex: 1;
-    }
+    notification.innerHTML = `
+        <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
+        <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--primary-color);">Загрузка завершена!</h2>
+        <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 25px;">Добро пожаловать в Necrograd</p>
+        <button onclick="this.parentElement.remove()" style="
+            background: linear-gradient(135deg, var(--primary-color), #cc0022);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            Продолжить
+        </button>
+    `;
+    
+    document.body.appendChild(notification);
 }
 
-@media (max-width: 480px) {
-    .music-control {
-        flex-wrap: wrap;
-        gap: 10px;
+// ==================== TIPS ROTATION ====================
+const tips = [
+    'Нажмите F1, чтобы открыть меню помощи на сервере',
+    'Используйте /help для списка доступных команд',
+    'Взаимодействуйте с другими игроками для лучшего опыта',
+    'Следите за своим здоровьем и голодом',
+    'Посетите центр города для квестов и заданий',
+    'Не забывайте сохранять прогресс регулярно',
+    'Исследуйте тёмные переулки для секретных предметов',
+    'Присоединяйтесь к фракциям для групповых заданий',
+    'Торгуйте с NPC для получения редких предметов',
+    'Будьте осторожны в ночное время - опасность возрастает',
+    'Проверяйте карту для поиска интересных локаций'
+];
+
+let currentTipIndex = 0;
+const tipText = document.getElementById('tip-text');
+
+setInterval(() => {
+    currentTipIndex = (currentTipIndex + 1) % tips.length;
+    tipText.style.opacity = '0';
+    setTimeout(() => {
+        tipText.textContent = tips[currentTipIndex];
+        tipText.style.opacity = '1';
+    }, 300);
+}, 8000);
+
+// Плавная анимация текста
+tipText.style.transition = 'opacity 0.3s ease';
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', (e) => {
+    if (!isStarted) return;
+    
+    // Space - play/pause music
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        if (isMusicPlaying) {
+            pauseMusic();
+        } else {
+            playMusic();
+        }
     }
     
-    .volume-control {
-        width: 100%;
-        justify-content: flex-end;
+    // Arrow Up - increase volume
+    if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        const newVolume = Math.min(100, parseInt(volumeSlider.value) + 5);
+        volumeSlider.value = newVolume;
+        bgMusic.volume = newVolume / 100;
+        volumePercent.textContent = `${newVolume}%`;
     }
     
-    .start-content h2 {
-        font-size: 26px;
+    // Arrow Down - decrease volume
+    if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        const newVolume = Math.max(0, parseInt(volumeSlider.value) - 5);
+        volumeSlider.value = newVolume;
+        bgMusic.volume = newVolume / 100;
+        volumePercent.textContent = `${newVolume}%`;
     }
     
-    .start-content p {
-        font-size: 14px;
+    // M - mute/unmute
+    if (e.code === 'KeyM') {
+        e.preventDefault();
+        if (isMusicPlaying) {
+            pauseMusic();
+        } else {
+            playMusic();
+        }
     }
-    
-    .start-icon {
-        width: 90px;
-        height: 90px;
-        margin-bottom: 25px;
+});
+
+// ==================== PREVENT CONTEXT MENU ====================
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+// ==================== MUSIC END EVENT ====================
+bgMusic.addEventListener('ended', () => {
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+});
+
+// ==================== PAGE VISIBILITY ====================
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (isMusicPlaying) {
+            bgMusic.pause();
+        }
+    } else {
+        if (isMusicPlaying) {
+            bgMusic.play().catch(err => console.log('Resume error:', err));
+        }
     }
-    
-    .start-icon svg {
-        width: 45px;
-        height: 45px;
-    }
-}
+});
