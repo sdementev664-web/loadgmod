@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <!-- GIF Background (автоматически воспроизводится) -->
+    <!-- GIF Background (задний фон) -->
     <div class="gif-background">
         <img src="background.gif" alt="Background" id="gif-bg">
         <div class="gif-overlay"></div>
@@ -18,18 +18,18 @@
     <!-- Particles -->
     <canvas id="particles"></canvas>
 
-    <!-- Audio Player -->
-    <audio id="bg-music" loop preload="auto">
+    <!-- Audio Player (автоматический повтор) -->
+    <audio id="bg-music" autoplay loop>
         <source src="tihij_ogonek.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Music Control -->
     <div class="music-control">
         <button class="music-toggle" id="music-toggle">
-            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
                 <path d="M8 5v14l11-7z"/>
             </svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
             </svg>
         </button>
@@ -48,25 +48,6 @@
         </div>
     </div>
 
-    <!-- Click to Start Overlay -->
-    <div class="start-overlay" id="start-overlay">
-        <div class="start-content">
-            <div class="start-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-                </svg>
-            </div>
-            <h2>Добро пожаловать в Necrograd</h2>
-            <p>Нажмите для продолжения</p>
-            <div class="start-hint">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; margin-bottom: 8px;">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-                <span>Музыка и GIF запустятся автоматически</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="container">
         
@@ -78,12 +59,12 @@
             </div>
             <div class="header-stats">
                 <div class="header-stat">
-                    <span class="header-stat-value" id="players-count">64</span>
+                    <span class="header-stat-value" id="players-count">0</span>
                     <span class="header-stat-label">игроков</span>
                 </div>
                 <div class="header-divider"></div>
                 <div class="header-stat">
-                    <span class="header-stat-value">128</span>
+                    <span class="header-stat-value" id="max-players">128</span>
                     <span class="header-stat-label">слотов</span>
                 </div>
             </div>
@@ -98,6 +79,10 @@
                     <span class="logo-text accent">GRAD</span>
                 </div>
                 <div class="logo-tagline">DARK ROLEPLAY SERVER</div>
+                <div class="server-info">
+                    <div class="server-map" id="server-map">gm_necrograd_downtown</div>
+                    <div class="server-gamemode" id="server-gamemode">DarkRP</div>
+                </div>
             </div>
         </main>
 
@@ -119,15 +104,15 @@
                 <div class="loading-details">
                     <div class="detail">
                         <span class="detail-label">ФАЙЛОВ</span>
-                        <span class="detail-value" id="files-count">0 / 347</span>
+                        <span class="detail-value" id="files-count">0 / 0</span>
                     </div>
                     <div class="detail">
                         <span class="detail-label">СКОРОСТЬ</span>
-                        <span class="detail-value" id="download-speed">-- MB/s</span>
+                        <span class="detail-value" id="download-speed">0 KB/s</span>
                     </div>
                     <div class="detail">
-                        <span class="detail-label">РАЗМЕР</span>
-                        <span class="detail-value" id="total-size">156 MB</span>
+                        <span class="detail-label">СКАЧАНО</span>
+                        <span class="detail-value" id="downloaded-size">0 MB</span>
                     </div>
                     <div class="detail">
                         <span class="detail-label">ПИНГ</span>
