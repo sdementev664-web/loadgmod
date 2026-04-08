@@ -9,20 +9,18 @@
 </head>
 <body>
 
-    <!-- GIF Background -->
+    <!-- GIF Background (локальный файл) -->
     <div class="gif-background">
-        <img src="https://i.pinimg.com/originals/be/b2/ef/beb2ef3a9cc505a47b8500686b36e5f3.gif" alt="Background">
+        <img src="images/background.gif" alt="Background">
         <div class="gif-overlay"></div>
     </div>
 
     <!-- Particles -->
     <canvas id="particles"></canvas>
 
-    <!-- Audio Player (Hidden) -->
-    <audio id="bg-music" loop>
-        <!-- Добавьте свои музыкальные файлы здесь -->
-        <source src="music/necrograd_theme.mp3" type="audio/mpeg">
-        <source src="music/necrograd_theme.ogg" type="audio/ogg">
+    <!-- Audio Player -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="music/tihij_ogonek.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Music Control -->
@@ -36,7 +34,7 @@
             </svg>
         </button>
         <div class="music-info">
-            <div class="music-title" id="music-title">Necrograd Theme</div>
+            <div class="music-title" id="music-title">Високосный Год - Тихий огонёк</div>
             <div class="music-artist">Background Music</div>
         </div>
         <div class="volume-control">
@@ -142,7 +140,4 @@
 
     <script src="script.js"></script>
 </body>
-</html><div class="music-info">
-    <div class="music-title" id="music-title">Високосный Год - Тихий огонёк</div>
-    <div class="music-artist">Background Music</div>
-</div>
+</html>
