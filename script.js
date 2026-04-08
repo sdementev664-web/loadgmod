@@ -1,11 +1,9 @@
 // ==================== GMOD FUNCTIONS ====================
 function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-    document.getElementById('server-map').textContent = mapname || 'gm_necrograd_downtown';
-    document.getElementById('server-gamemode').textContent = gamemode || 'DarkRP';
-    document.getElementById('max-players').textContent = maxplayers || '128';
     console.log('🎮 Server:', servername);
     console.log('🗺️ Map:', mapname);
     console.log('🎯 Gamemode:', gamemode);
+    console.log('👥 Max Players:', maxplayers);
 }
 
 function SetFilesNeeded(needed) {
@@ -93,74 +91,37 @@ window.addEventListener('resize', () => {
     canvas.height = window.innerHeight;
 });
 
-// ==================== MUSIC PLAYER (AUTO-REPEAT) ====================
+// ==================== MUSIC AUTO-PLAY ====================
 const bgMusic = document.getElementById('bg-music');
-const musicToggle = document.getElementById('music-toggle');
-const iconPlay = musicToggle.querySelector('.icon-play');
-const iconPause = musicToggle.querySelector('.icon-pause');
-const volumeSlider = document.getElementById('volume-slider');
-const volumePercent = document.getElementById('volume-percent');
-const gifBg = document.getElementById('gif-bg');
-
-let isMusicPlaying = true;
-
-// Set initial volume
 bgMusic.volume = 0.5;
 
-// Автоматический запуск музыки при загрузке
+// Автоматический запуск музыки
 window.addEventListener('load', () => {
     bgMusic.play().catch(err => {
-        console.log('⚠️ Автозапуск музыки заблокирован браузером');
-        console.log('💡 Кликните в любом месте для запуска музыки');
-        isMusicPlaying = false;
-        iconPlay.style.display = 'block';
-        iconPause.style.display = 'none';
+        console.log('⚠️ Автозапуск музыки заблокирован');
+        // Попытка запуска при первом клике
+        document.addEventListener('click', function startMusic() {
+            bgMusic.play().then(() => {
+                console.log('🎵 Музыка запущена!');
+            });
+            document.removeEventListener('click', startMusic);
+        }, { once: true });
     });
 });
 
-// Клик в любом месте для запуска музыки (если автозапуск заблокирован)
-document.addEventListener('click', function autoPlayMusic() {
-    if (!isMusicPlaying) {
-        bgMusic.play().then(() => {
-            isMusicPlaying = true;
-            iconPlay.style.display = 'none';
-            iconPause.style.display = 'block';
-            console.log('🎵 Музыка запущена!');
-        }).catch(err => console.log('Ошибка воспроизведения:', err));
-    }
-    document.removeEventListener('click', autoPlayMusic);
-}, { once: true });
-
-// Автоматический повтор музыки
+// Автоматический повтор
 bgMusic.addEventListener('ended', () => {
     bgMusic.currentTime = 0;
-    bgMusic.play().then(() => {
-        console.log('🔁 Музыка повторяется автоматически');
-    }).catch(err => console.log('Ошибка повтора:', err));
+    bgMusic.play();
 });
 
-// Кнопка управления музыкой
-musicToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isMusicPlaying) {
+// Пауза при смене вкладки
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
         bgMusic.pause();
-        isMusicPlaying = false;
-        iconPlay.style.display = 'block';
-        iconPause.style.display = 'none';
     } else {
-        bgMusic.play().then(() => {
-            isMusicPlaying = true;
-            iconPlay.style.display = 'none';
-            iconPause.style.display = 'block';
-        });
+        bgMusic.play().catch(() => {});
     }
-});
-
-// Регулировка громкости
-volumeSlider.addEventListener('input', (e) => {
-    const volume = e.target.value / 100;
-    bgMusic.volume = volume;
-    volumePercent.textContent = `${e.target.value}%`;
 });
 
 // ==================== LOADING SIMULATION ====================
@@ -176,26 +137,29 @@ const filesCount = document.getElementById('files-count');
 const downloadSpeed = document.getElementById('download-speed');
 const downloadedSize = document.getElementById('downloaded-size');
 const pingValue = document.getElementById('ping-value');
-const playersCount = document.getElementById('players-count');
 
-// Симуляция загрузки файлов
+// Список файлов для симуляции
 const files = [
-    'models/city_buildings.mdl',
+    'models/city/buildings_01.mdl',
+    'models/city/buildings_02.mdl',
+    'models/city/buildings_03.mdl',
     'materials/textures/roads.vtf',
-    'sound/ambient/wind.wav',
+    'materials/textures/concrete.vtf',
+    'materials/textures/graffiti.vtf',
+    'sound/ambient/city_wind.wav',
+    'sound/ambient/rain.wav',
+    'sound/ambient/thunder.wav',
     'scripts/game_sounds.txt',
+    'scripts/weapons_config.lua',
+    'scripts/npc_ai.lua',
     'maps/gm_necrograd_downtown.bsp',
     'models/vehicles/police_car.mdl',
-    'materials/textures/graffiti.vtf',
-    'sound/weapons/gunshot.wav',
-    'scripts/npc_ai.lua',
+    'models/vehicles/taxi.mdl',
     'models/props/streetlight.mdl',
+    'models/props/trash_bin.mdl',
     'materials/skybox/night_sky.vtf',
     'sound/music/background_01.mp3',
-    'scripts/player_animations.txt',
-    'models/characters/citizen_male.mdl',
-    'materials/textures/concrete.vtf',
-    'sound/ambient/rain.wav',
+    'sound/weapons/gunshot.wav',
 ];
 
 function updateProgress() {
@@ -211,13 +175,13 @@ function updateProgress() {
     downloadedSize.textContent = downloadedMB.toFixed(1) + ' MB';
 }
 
-// Симуляция скачивания
+// Симуляция скачивания файлов
 setInterval(() => {
     if (filesDownloaded < totalFiles) {
         const randomFile = files[Math.floor(Math.random() * files.length)];
         DownloadingFile(randomFile);
         
-        // Случайная скорость
+        // Случайная скорость загрузки
         const speed = (Math.random() * 800 + 200).toFixed(0);
         downloadSpeed.textContent = speed + ' KB/s';
     } else {
@@ -231,19 +195,6 @@ setInterval(() => {
     const ping = Math.floor(Math.random() * 40 + 10);
     pingValue.textContent = ping + ' ms';
 }, 2000);
-
-// Обновление количества игроков
-setInterval(() => {
-    if (Math.random() > 0.7) {
-        const current = parseInt(playersCount.textContent);
-        const change = Math.random() > 0.5 ? 1 : -1;
-        const newCount = Math.max(45, Math.min(75, current + change));
-        playersCount.textContent = newCount;
-    }
-}, 5000);
-
-// Начальное значение игроков
-playersCount.textContent = Math.floor(Math.random() * 20 + 50);
 
 // ==================== TIPS ROTATION ====================
 const tips = [
@@ -259,11 +210,12 @@ const tips = [
     'Будьте осторожны в ночное время - опасность возрастает',
     'Проверяйте карту для поиска интересных локаций',
     'Кастомизируйте своего персонажа в меню F3',
+    'Используйте чат для общения с другими игроками',
+    'Зарабатывайте деньги выполняя работы и задания',
 ];
 
 let currentTipIndex = 0;
 const tipText = document.getElementById('tip-text');
-tipText.style.transition = 'opacity 0.3s ease';
 
 setInterval(() => {
     currentTipIndex = (currentTipIndex + 1) % tips.length;
@@ -274,40 +226,11 @@ setInterval(() => {
     }, 300);
 }, 7000);
 
-// ==================== KEYBOARD SHORTCUTS ====================
-document.addEventListener('keydown', (e) => {
-    // Space / M - play/pause music
-    if ((e.code === 'Space' || e.code === 'KeyM') && e.target.tagName !== 'INPUT') {
-        e.preventDefault();
-        musicToggle.click();
-    }
-    
-    // Arrow Up - increase volume
-    if (e.code === 'ArrowUp') {
-        e.preventDefault();
-        const newVolume = Math.min(100, parseInt(volumeSlider.value) + 5);
-        volumeSlider.value = newVolume;
-        bgMusic.volume = newVolume / 100;
-        volumePercent.textContent = `${newVolume}%`;
-    }
-    
-    // Arrow Down - decrease volume
-    if (e.code === 'ArrowDown') {
-        e.preventDefault();
-        const newVolume = Math.max(0, parseInt(volumeSlider.value) - 5);
-        volumeSlider.value = newVolume;
-        bgMusic.volume = newVolume / 100;
-        volumePercent.textContent = `${newVolume}%`;
-    }
-});
-
 // ==================== CONSOLE STYLING ====================
-console.log('%c╔═══════════════════════════════════════════╗', 'color: #ff4655; font-weight: bold;');
-console.log('%c║     🎮 NECROGRAD LOADING SCREEN 🎮      ║', 'color: #ff4655; font-size: 18px; font-weight: bold;');
-console.log('%c╚═══════════════════════════════════════════╝', 'color: #ff4655; font-weight: bold;');
-console.log('%c\n🎵 Музыка: Автоматический повтор включен', 'color: #00ff88; font-weight: bold;');
+console.log('%c╔═══════════════════════════════════════════╗', 'color: #00d9ff; font-weight: bold;');
+console.log('%c║     🎮 NECROGRAD LOADING SCREEN 🎮      ║', 'color: #00d9ff; font-size: 18px; font-weight: bold;');
+console.log('%c╚═══════════════════════════════════════════╝', 'color: #00d9ff; font-weight: bold;');
+console.log('%c\n🎵 Музыка: Автоматический повтор активен', 'color: #00ff88; font-weight: bold;');
 console.log('%c🎬 GIF: Воспроизводится в фоне', 'color: #00d9ff; font-weight: bold;');
-console.log('%c\n⌨️ Горячие клавиши:', 'color: #fff; font-size: 14px; font-weight: bold;');
-console.log('%c   SPACE/M - Пауза/Воспроизведение', 'color: #8b92b0;');
-console.log('%c   ↑/↓     - Громкость +/-', 'color: #8b92b0;');
-console.log('%c\n📡 GMod Functions: Активны', 'color: #00d9ff;');
+console.log('%c📡 GMod Functions: Готовы к использованию', 'color: #00d9ff;');
+console.log('%c\n✨ Минималистичный дизайн загружен', 'color: #ff4655; font-weight: bold;');
