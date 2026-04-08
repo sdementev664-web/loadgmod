@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <!-- GIF Background (задний фон) -->
+    <!-- GIF Background -->
     <div class="gif-background">
         <img src="background.gif" alt="Background" id="gif-bg">
         <div class="gif-overlay"></div>
@@ -18,57 +18,13 @@
     <!-- Particles -->
     <canvas id="particles"></canvas>
 
-    <!-- Audio Player (автоматический повтор) -->
-    <audio id="bg-music" autoplay loop>
+    <!-- Audio Player (скрытый, автоматический повтор) -->
+    <audio id="bg-music" autoplay loop style="display:none;">
         <source src="tihij_ogonek.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Music Control -->
-    <div class="music-control">
-        <button class="music-toggle" id="music-toggle">
-            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
-                <path d="M8 5v14l11-7z"/>
-            </svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-        </button>
-        <div class="music-info">
-            <div class="music-title" id="music-title">Високосный Год - Тихий огонёк</div>
-            <div class="music-artist">Background Music</div>
-        </div>
-        <div class="volume-control">
-            <button class="volume-btn" id="volume-btn">
-                <svg class="volume-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                </svg>
-            </button>
-            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
-            <span class="volume-percent" id="volume-percent">50%</span>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="container">
-        
-        <!-- Header -->
-        <header class="header">
-            <div class="server-status">
-                <span class="status-dot"></span>
-                <span class="status-text">ONLINE</span>
-            </div>
-            <div class="header-stats">
-                <div class="header-stat">
-                    <span class="header-stat-value" id="players-count">0</span>
-                    <span class="header-stat-label">игроков</span>
-                </div>
-                <div class="header-divider"></div>
-                <div class="header-stat">
-                    <span class="header-stat-value" id="max-players">128</span>
-                    <span class="header-stat-label">слотов</span>
-                </div>
-            </div>
-        </header>
 
         <!-- Center Logo -->
         <main class="main-content">
@@ -79,10 +35,6 @@
                     <span class="logo-text accent">GRAD</span>
                 </div>
                 <div class="logo-tagline">DARK ROLEPLAY SERVER</div>
-                <div class="server-info">
-                    <div class="server-map" id="server-map">gm_necrograd_downtown</div>
-                    <div class="server-gamemode" id="server-gamemode">DarkRP</div>
-                </div>
             </div>
         </main>
 
