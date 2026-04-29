@@ -29,7 +29,7 @@ class Particle {
         this.speedY = (Math.random() - 0.5) * 0.4;
         this.opacity = Math.random() * 0.4 + 0.1;
         this._currentOpacity = this.opacity;
-        this.color = Math.random() > 0.7 ? '#00d9ff' : (Math.random() > 0.5 ? '#ff4655' : '#ffffff');
+        this.color = Math.random() > 0.7 ? '#4d8aff' : (Math.random() > 0.5 ? '#ff4655' : '#ffffff');
         this.pulse = Math.random() * Math.PI * 2;
         this.pulseSpeed = Math.random() * 0.02 + 0.008;
     }
@@ -88,7 +88,7 @@ function drawConnections() {
                 ctx.beginPath();
                 ctx.moveTo(particles[i].x, particles[i].y);
                 ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.strokeStyle = '#00d9ff';
+                ctx.strokeStyle = '#4d8aff';
                 ctx.globalAlpha = (1 - dist / 100) * 0.1;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
@@ -202,13 +202,11 @@ function doGridBeat() {
     requestAnimationFrame(animate);
 }
 
-// --- GIF ФОН: наклон лево-назад / право-назад (синхронно с сеткой) ---
+// --- GIF ФОН: наклон синхронно с сеткой ---
 function doGifBeat() {
     if (gifBeatActive) return;
     gifBeatActive = true;
 
-    // Берём то же направление что сетка только что взяла
-    // gridDirection уже переключился, значит текущий dir = противоположный
     const dir = gridDirection === 0 ? 1 : -1;
 
     const startTime = performance.now();
@@ -249,14 +247,14 @@ function pulseEffects() {
     if (gridBg) {
         gridBg.style.transition = 'none';
         gridBg.style.backgroundImage = `
-            linear-gradient(rgba(0, 217, 255, 0.18) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 217, 255, 0.18) 1px, transparent 1px)
+            linear-gradient(rgba(77, 138, 255, 0.18) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(77, 138, 255, 0.18) 1px, transparent 1px)
         `;
         setTimeout(() => {
             gridBg.style.transition = 'background-image 0.3s ease';
             gridBg.style.backgroundImage = `
-                linear-gradient(rgba(0, 217, 255, 0.07) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 217, 255, 0.07) 1px, transparent 1px)
+                linear-gradient(rgba(77, 138, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(77, 138, 255, 0.07) 1px, transparent 1px)
             `;
         }, 60);
     }
@@ -305,8 +303,8 @@ function simulateLoading() {
     } else {
         if (loadingPercent) {
             loadingPercent.textContent = '100%';
-            loadingPercent.style.color = '#00ff64';
-            loadingPercent.style.textShadow = '0 0 20px rgba(0, 255, 100, 0.6)';
+            loadingPercent.style.color = '#00ff88';
+            loadingPercent.style.textShadow = '0 0 20px rgba(0, 255, 136, 0.6)';
         }
         const label = document.querySelector('.loading-label');
         if (label) label.textContent = 'ГОТОВО';
