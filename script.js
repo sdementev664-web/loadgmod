@@ -115,71 +115,101 @@ document.addEventListener('click', () => {
 // ============ BEAT ANIMATION ============
 const logoWrapper = document.getElementById('logo-wrapper');
 const logo = logoWrapper.querySelector('.logo');
+const gridBg = document.querySelector('.grid-background');
+const glowEl = document.querySelector('.logo-glow');
 
 const beatDuration = 300;
-const beatPause = 200;  // <-- изменено с 400 на 200
+const beatPause = 200;
 
-let beatDirection = 0;
-let beatActive = false;
+let gridDirection = 0; // 0 = лево-назад, 1 = право-назад
+let logoBeatActive = false;
+let gridBeatActive = false;
 
-function doBeat() {
-    if (beatActive) return;
-    beatActive = true;
-
-    const dir = beatDirection === 0 ? -1 : 1;
-    beatDirection = beatDirection === 0 ? 1 : 0;
+// --- ЛОГОТИП: прыжок вниз под бит ---
+function doLogoBeat() {
+    if (logoBeatActive) return;
+    logoBeatActive = true;
 
     logoWrapper.classList.add('beat-hit');
-
     const startTime = performance.now();
 
-    function animateBeat(now) {
+    function animate(now) {
         const elapsed = now - startTime;
         const t = Math.min(elapsed / beatDuration, 1);
 
         let ease;
-        if (t < 0.5) {
-            ease = t * 2;
+        if (t < 0.4) {
+            // быстро вниз
+            ease = t / 0.4;
         } else {
-            ease = (1 - t) * 2;
+            // плавно назад
+            ease = 1 - ((t - 0.4) / 0.6);
         }
 
-        const rotateY = dir * 14 * ease;
-        const rotateZ = dir * 4 * ease;
-        const scale = 1 + 0.1 * ease;
-        const translateZ = 50 * ease;
+        const moveY = 18 * ease;
+        const scaleVal = 1 + 0.06 * ease;
 
-        logo.style.transform = `rotateY(${rotateY}deg) rotateZ(${rotateZ}deg) scale(${scale}) translateZ(${translateZ}px)`;
+        logo.style.transform = `translateY(${moveY}px) scale(${scaleVal})`;
 
         if (t < 1) {
-            requestAnimationFrame(animateBeat);
+            requestAnimationFrame(animate);
         } else {
-            logo.style.transform = 'rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px)';
+            logo.style.transform = 'translateY(0px) scale(1)';
             logoWrapper.classList.remove('beat-hit');
-            beatActive = false;
+            logoBeatActive = false;
         }
     }
 
-    requestAnimationFrame(animateBeat);
+    requestAnimationFrame(animate);
 }
 
-function beatLoop() {
-    doBeat();
-    setTimeout(beatLoop, beatDuration + beatPause);
+// --- СЕТКА (ФОН): наклон лево-назад / право-назад ---
+function doGridBeat() {
+    if (gridBeatActive) return;
+    gridBeatActive = true;
+
+    const dir = gridDirection === 0 ? -1 : 1;
+    gridDirection = gridDirection === 0 ? 1 : 0;
+
+    const startTime = performance.now();
+
+    function animate(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / beatDuration, 1);
+
+        let ease;
+        if (t < 0.4) {
+            ease = t / 0.4;
+        } else {
+            ease = 1 - ((t - 0.4) / 0.6);
+        }
+
+        // rotateY = лево/право, rotateX = назад (наклон от зрителя)
+        const rotateY = dir * 4 * ease;
+        const rotateX = 3 * ease;
+        const scaleGrid = 1 + 0.02 * ease;
+
+        gridBg.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scaleGrid})`;
+
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            gridBg.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+            gridBeatActive = false;
+        }
+    }
+
+    requestAnimationFrame(animate);
 }
 
-setTimeout(beatLoop, 1000);
-
-// ============ GRID BEAT PULSE ============
-const gridBg = document.querySelector('.grid-background');
-const glowEl = document.querySelector('.logo-glow');
-
-function pulseOnBeat() {
+// --- Пульс свечения и яркости сетки ---
+function pulseEffects() {
+    // Сетка - вспышка яркости
     if (gridBg) {
         gridBg.style.transition = 'none';
         gridBg.style.backgroundImage = `
-            linear-gradient(rgba(0, 217, 255, 0.15) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 217, 255, 0.15) 1px, transparent 1px)
+            linear-gradient(rgba(0, 217, 255, 0.18) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 217, 255, 0.18) 1px, transparent 1px)
         `;
         setTimeout(() => {
             gridBg.style.transition = 'background-image 0.3s ease';
@@ -187,24 +217,29 @@ function pulseOnBeat() {
                 linear-gradient(rgba(0, 217, 255, 0.07) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 217, 255, 0.07) 1px, transparent 1px)
             `;
-        }, 50);
+        }, 60);
     }
 
+    // Glow - вспышка
     if (glowEl) {
         glowEl.style.transition = 'none';
-        glowEl.style.opacity = '0.7';
+        glowEl.style.opacity = '0.75';
         setTimeout(() => {
             glowEl.style.transition = 'opacity 0.4s ease';
             glowEl.style.opacity = '0.35';
-        }, 50);
+        }, 60);
     }
 }
 
-function beatPulseLoop() {
-    pulseOnBeat();
-    setTimeout(beatPulseLoop, beatDuration + beatPause);
+// --- Главный цикл бита ---
+function beatLoop() {
+    doLogoBeat();
+    doGridBeat();
+    pulseEffects();
+    setTimeout(beatLoop, beatDuration + beatPause);
 }
-setTimeout(beatPulseLoop, 1000);
+
+setTimeout(beatLoop, 1000);
 
 // ============ LOADING ============
 const loadingPercent = document.getElementById('loading-percent');
