@@ -112,17 +112,14 @@ document.addEventListener('click', () => {
     if (bgMusic.paused) bgMusic.play().catch(() => {});
 }, { once: true });
 
-// ============ BEAT ANIMATION (JS controlled) ============
+// ============ BEAT ANIMATION ============
 const logoWrapper = document.getElementById('logo-wrapper');
 const logo = logoWrapper.querySelector('.logo');
 
-// Ритм: лево-вперёд → пауза 0.4с → право-вперёд → пауза 0.4с → повтор
-// Каждый удар = 0.3с движение, 0.4с пауза
+const beatDuration = 300;
+const beatPause = 200;  // <-- изменено с 400 на 200
 
-const beatDuration = 300;  // время движения удара (мс)
-const beatPause = 400;     // пауза между ударами (мс)
-
-let beatDirection = 0; // 0 = left, 1 = right
+let beatDirection = 0;
 let beatActive = false;
 
 function doBeat() {
@@ -132,23 +129,18 @@ function doBeat() {
     const dir = beatDirection === 0 ? -1 : 1;
     beatDirection = beatDirection === 0 ? 1 : 0;
 
-    // Добавляем glow класс
     logoWrapper.classList.add('beat-hit');
 
-    // Анимация через JS для точного контроля
     const startTime = performance.now();
 
     function animateBeat(now) {
         const elapsed = now - startTime;
         const t = Math.min(elapsed / beatDuration, 1);
 
-        // Ease out bounce feel
         let ease;
         if (t < 0.5) {
-            // Ускорение вперёд
             ease = t * 2;
         } else {
-            // Возврат назад
             ease = (1 - t) * 2;
         }
 
@@ -171,22 +163,18 @@ function doBeat() {
     requestAnimationFrame(animateBeat);
 }
 
-// Запускаем биты с паузой
 function beatLoop() {
     doBeat();
     setTimeout(beatLoop, beatDuration + beatPause);
 }
 
-// Старт через 1 секунду после загрузки
 setTimeout(beatLoop, 1000);
 
 // ============ GRID BEAT PULSE ============
 const gridBg = document.querySelector('.grid-background');
 const glowEl = document.querySelector('.logo-glow');
 
-// Синхронизируем пульс сетки и glow с битом
 function pulseOnBeat() {
-    // Grid flash
     if (gridBg) {
         gridBg.style.transition = 'none';
         gridBg.style.backgroundImage = `
@@ -194,7 +182,7 @@ function pulseOnBeat() {
             linear-gradient(90deg, rgba(0, 217, 255, 0.15) 1px, transparent 1px)
         `;
         setTimeout(() => {
-            gridBg.style.transition = 'background-image 0.4s ease';
+            gridBg.style.transition = 'background-image 0.3s ease';
             gridBg.style.backgroundImage = `
                 linear-gradient(rgba(0, 217, 255, 0.07) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 217, 255, 0.07) 1px, transparent 1px)
@@ -202,18 +190,16 @@ function pulseOnBeat() {
         }, 50);
     }
 
-    // Glow flash
     if (glowEl) {
         glowEl.style.transition = 'none';
         glowEl.style.opacity = '0.7';
         setTimeout(() => {
-            glowEl.style.transition = 'opacity 0.5s ease';
+            glowEl.style.transition = 'opacity 0.4s ease';
             glowEl.style.opacity = '0.35';
         }, 50);
     }
 }
 
-// Синхронизируем с beatLoop
 function beatPulseLoop() {
     pulseOnBeat();
     setTimeout(beatPulseLoop, beatDuration + beatPause);
@@ -241,7 +227,6 @@ function simulateLoading() {
     if (display < 100) {
         setTimeout(simulateLoading, 50);
     } else {
-        // Готово
         if (loadingPercent) {
             loadingPercent.textContent = '100%';
             loadingPercent.style.color = '#00ff64';
