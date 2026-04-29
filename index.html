@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Necrograd - Loading</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -13,69 +13,233 @@
     <div class="gif-background">
         <img src="background.gif" alt="Background" id="gif-bg">
         <div class="gif-overlay"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
     </div>
 
     <!-- Particles -->
     <canvas id="particles"></canvas>
 
-    <!-- Audio Player (скрытый, автоматический повтор) -->
+    <!-- Audio Player -->
     <audio id="bg-music" autoplay loop style="display:none;">
         <source src="tihij_ogonek.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Corner Decorations -->
+    <div class="corner-decor top-left"></div>
+    <div class="corner-decor top-right"></div>
+    <div class="corner-decor bottom-left"></div>
+    <div class="corner-decor bottom-right"></div>
+
+    <!-- Side Info Panels -->
+    <div class="side-panel left-panel">
+        <div class="panel-line"></div>
+        <div class="panel-data">
+            <span class="data-label">SYS</span>
+            <span class="data-value" id="sys-status">ONLINE</span>
+        </div>
+        <div class="panel-data">
+            <span class="data-label">MEM</span>
+            <span class="data-value" id="mem-usage">2.4 GB</span>
+        </div>
+        <div class="panel-data">
+            <span class="data-label">CPU</span>
+            <span class="data-value" id="cpu-usage">34%</span>
+        </div>
+        <div class="panel-line"></div>
+    </div>
+
+    <div class="side-panel right-panel">
+        <div class="panel-line"></div>
+        <div class="panel-data">
+            <span class="data-label">MAP</span>
+            <span class="data-value">rp_necrograd</span>
+        </div>
+        <div class="panel-data">
+            <span class="data-label">PLAYERS</span>
+            <span class="data-value" id="player-count">47 / 64</span>
+        </div>
+        <div class="panel-data">
+            <span class="data-label">TICK</span>
+            <span class="data-value" id="tick-rate">64</span>
+        </div>
+        <div class="panel-line"></div>
+    </div>
+
     <!-- Main Content -->
     <div class="container">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-left-info">
+                <div class="server-badge">
+                    <div class="badge-dot"></div>
+                    <span>СЕРВЕР АКТИВЕН</span>
+                </div>
+                <div class="server-time" id="server-time">00:00:00</div>
+            </div>
+            <div class="top-right-info">
+                <div class="music-control" id="music-toggle">
+                    <div class="music-bars">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                    <span class="music-label">MUSIC</span>
+                </div>
+                <div class="version-tag">v3.2.1</div>
+            </div>
+        </header>
 
         <!-- Center Logo -->
         <main class="main-content">
             <div class="logo-section">
                 <div class="logo-glow"></div>
-                <div class="logo">
-                    <span class="logo-text">NECRO</span>
-                    <span class="logo-text accent">GRAD</span>
+                <div class="logo-glow secondary"></div>
+                
+                <!-- Orbiting ring -->
+                <div class="orbit-ring">
+                    <div class="orbit-dot"></div>
                 </div>
-                <div class="logo-tagline">DARK ROLEPLAY SERVER</div>
+
+                <div class="logo-wrapper">
+                    <div class="logo" data-text="NECROGRAD">
+                        <span class="logo-text glitch" data-text="NECRO">NECRO</span>
+                        <span class="logo-text accent glitch" data-text="GRAD">GRAD</span>
+                    </div>
+                    
+                    <!-- Decorative lines -->
+                    <div class="logo-lines">
+                        <div class="h-line left"></div>
+                        <div class="diamond"></div>
+                        <div class="h-line right"></div>
+                    </div>
+                    
+                    <div class="logo-tagline">
+                        <span class="tagline-bracket">[</span>
+                        <span class="tagline-text">DARK ROLEPLAY SERVER</span>
+                        <span class="tagline-bracket">]</span>
+                    </div>
+
+                    <div class="logo-subtitle">
+                        <span class="sub-dash">——</span>
+                        <span>ENTER THE DARKNESS</span>
+                        <span class="sub-dash">——</span>
+                    </div>
+                </div>
             </div>
         </main>
 
         <!-- Footer / Loading -->
         <footer class="footer">
+            <!-- Console Log -->
+            <div class="console-log" id="console-log">
+                <div class="console-header">
+                    <span class="console-title">
+                        <span class="console-icon">›</span>
+                        CONSOLE OUTPUT
+                    </span>
+                    <span class="console-time" id="console-time">00:00:00</span>
+                </div>
+                <div class="console-messages" id="console-messages">
+                    <div class="console-line"><span class="console-timestamp">[00:00:00]</span> <span class="console-msg info">Инициализация подключения...</span></div>
+                </div>
+            </div>
+
             <div class="loading-section">
                 <div class="loading-header">
                     <div class="loading-status">
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                        </div>
                         <span class="loading-label">ЗАГРУЗКА</span>
                         <span class="loading-percentage" id="loading-percent">0%</span>
                     </div>
-                    <div class="loading-file" id="loading-file">Подключение к серверу...</div>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progress-bar">
-                        <div class="progress-glow"></div>
+                    <div class="loading-file" id="loading-file">
+                        <span class="file-icon">📁</span>
+                        Подключение к серверу...
                     </div>
                 </div>
+
+                <!-- Multi-layer Progress Bar -->
+                <div class="progress-wrapper">
+                    <div class="progress-markers">
+                        <span class="marker" style="left: 25%">25</span>
+                        <span class="marker" style="left: 50%">50</span>
+                        <span class="marker" style="left: 75%">75</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bg-pattern"></div>
+                        <div class="progress-bar" id="progress-bar">
+                            <div class="progress-glow"></div>
+                            <div class="progress-stripes"></div>
+                        </div>
+                    </div>
+                    <div class="progress-edge-glow" id="progress-edge"></div>
+                </div>
+
                 <div class="loading-details">
                     <div class="detail">
-                        <span class="detail-label">ФАЙЛОВ</span>
-                        <span class="detail-value" id="files-count">0 / 0</span>
+                        <div class="detail-icon-wrap">
+                            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                <polyline points="13 2 13 9 20 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="detail-info">
+                            <span class="detail-label">ФАЙЛОВ</span>
+                            <span class="detail-value" id="files-count">0 / 0</span>
+                        </div>
                     </div>
                     <div class="detail">
-                        <span class="detail-label">СКОРОСТЬ</span>
-                        <span class="detail-value" id="download-speed">0 KB/s</span>
+                        <div class="detail-icon-wrap">
+                            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="detail-info">
+                            <span class="detail-label">СКОРОСТЬ</span>
+                            <span class="detail-value" id="download-speed">0 KB/s</span>
+                        </div>
                     </div>
                     <div class="detail">
-                        <span class="detail-label">СКАЧАНО</span>
-                        <span class="detail-value" id="downloaded-size">0 MB</span>
+                        <div class="detail-icon-wrap">
+                            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </div>
+                        <div class="detail-info">
+                            <span class="detail-label">СКАЧАНО</span>
+                            <span class="detail-value" id="downloaded-size">0 MB</span>
+                        </div>
                     </div>
                     <div class="detail">
-                        <span class="detail-label">ПИНГ</span>
-                        <span class="detail-value" id="ping-value">-- ms</span>
+                        <div class="detail-icon-wrap">
+                            <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="detail-info">
+                            <span class="detail-label">ПИНГ</span>
+                            <span class="detail-value" id="ping-value">-- ms</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="tip-section">
-                <span class="tip-icon">i</span>
+                <div class="tip-icon-wrap">
+                    <span class="tip-icon">💡</span>
+                    <span class="tip-label">СОВЕТ</span>
+                </div>
+                <div class="tip-divider"></div>
                 <span class="tip-text" id="tip-text">Нажмите F1, чтобы открыть меню помощи на сервере</span>
+                <div class="tip-progress" id="tip-progress"></div>
             </div>
         </footer>
 
