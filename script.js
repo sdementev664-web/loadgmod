@@ -29,6 +29,7 @@ class Particle {
         this.speedY = (Math.random() - 0.5) * 0.5;
         this.opacity = Math.random() * 0.5 + 0.1;
         this.targetOpacity = this.opacity;
+        this._currentOpacity = this.opacity;
         this.color = Math.random() > 0.7 ? '#00d9ff' : (Math.random() > 0.5 ? '#ff4655' : '#ffffff');
         this.pulse = Math.random() * Math.PI * 2;
         this.pulseSpeed = Math.random() * 0.02 + 0.01;
@@ -39,7 +40,6 @@ class Particle {
         this.y += this.speedY;
         this.pulse += this.pulseSpeed;
 
-        // Mouse interaction
         const dx = this.x - mouse.x;
         const dy = this.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -54,11 +54,8 @@ class Particle {
             this.targetOpacity = this.opacity;
         }
 
-        // Smooth opacity transition
-        const currentOpacity = parseFloat(this._currentOpacity || this.opacity);
-        this._currentOpacity = currentOpacity + (this.targetOpacity - currentOpacity) * 0.05;
+        this._currentOpacity += (this.targetOpacity - this._currentOpacity) * 0.05;
 
-        // Wrap around screen
         if (this.x < -10) this.x = canvas.width + 10;
         if (this.x > canvas.width + 10) this.x = -10;
         if (this.y < -10) this.y = canvas.height + 10;
@@ -73,7 +70,6 @@ class Particle {
         ctx.globalAlpha = pulseOpacity;
         ctx.fill();
 
-        // Glow effect for larger particles
         if (this.size > 1.5) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
@@ -84,13 +80,11 @@ class Particle {
     }
 }
 
-// Create particles
 const particleCount = Math.min(120, Math.floor((canvas.width * canvas.height) / 12000));
 for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
 }
 
-// Draw connections between nearby particles
 function drawConnections() {
     const maxDist = 120;
     for (let i = 0; i < particles.length; i++) {
@@ -115,15 +109,9 @@ function drawConnections() {
 
 function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(p => {
-        p.update();
-        p.draw();
-    });
-
+    particles.forEach(p => { p.update(); p.draw(); });
     drawConnections();
     ctx.globalAlpha = 1;
-
     requestAnimationFrame(animateParticles);
 }
 animateParticles();
@@ -145,7 +133,6 @@ const musicToggle = document.getElementById('music-toggle');
 const bgMusic = document.getElementById('bg-music');
 let isMuted = false;
 
-// Attempt autoplay
 document.addEventListener('click', () => {
     if (bgMusic.paused) {
         bgMusic.play().catch(() => {});
@@ -275,8 +262,6 @@ let tipTimer = 0;
 const tipDuration = 8000;
 let consoleIndex = 0;
 let lastConsoleTime = 0;
-
-// Simulated stats
 let downloadedMB = 0;
 let totalMB = 347.2;
 
@@ -294,11 +279,9 @@ function addConsoleMessage(msg, type) {
     line.innerHTML = `<span class="console-timestamp">[${getTimestamp()}]</span> <span class="console-msg ${type}">${msg}</span>`;
     container.appendChild(line);
 
-    // Keep only last 3 messages visible
     while (container.children.length > 3) {
         container.removeChild(container.firstChild);
     }
-
     container.scrollTop = container.scrollHeight;
 }
 
@@ -315,54 +298,43 @@ function updateTip() {
 }
 
 function formatSpeed(kbps) {
-    if (kbps > 1024) {
-        return (kbps / 1024).toFixed(1) + ' MB/s';
-    }
+    if (kbps > 1024) return (kbps / 1024).toFixed(1) + ' MB/s';
     return Math.round(kbps) + ' KB/s';
 }
 
 function simulateLoading() {
     const now = Date.now();
 
-    // Increment progress with variable speed
     if (targetProgress < 100) {
         const increment = Math.random() * 2 + 0.3;
         targetProgress = Math.min(100, targetProgress + increment);
     }
 
-    // Smooth progress
     currentProgress += (targetProgress - currentProgress) * 0.08;
     const displayProgress = Math.min(Math.round(currentProgress), 100);
 
-    // Update UI
     if (loadingPercent) loadingPercent.textContent = displayProgress + '%';
     if (progressBar) progressBar.style.width = displayProgress + '%';
     if (progressEdge) progressEdge.style.left = `calc(${displayProgress}% - 6px)`;
 
-    // Update file name
     const fileIdx = Math.min(Math.floor((displayProgress / 100) * totalFiles), totalFiles - 1);
     if (fileIdx !== currentFileIndex && fileIdx < totalFiles) {
         currentFileIndex = fileIdx;
         if (loadingFile) loadingFile.innerHTML = `<span class="file-icon">📁</span> ${files[currentFileIndex]}`;
     }
 
-    // Files count
     const loadedFiles = Math.min(Math.floor((displayProgress / 100) * totalFiles), totalFiles);
     if (filesCount) filesCount.textContent = `${loadedFiles} / ${totalFiles}`;
 
-    // Download speed
     const speed = Math.random() * 800 + 200 + (Math.sin(now * 0.001) * 300);
     if (downloadSpeed) downloadSpeed.textContent = formatSpeed(speed);
 
-    // Downloaded size
     downloadedMB = (displayProgress / 100) * totalMB;
     if (downloadedSize) downloadedSize.textContent = downloadedMB.toFixed(1) + ' MB';
 
-    // Ping
     const ping = Math.floor(Math.random() * 15 + 28 + Math.sin(now * 0.0005) * 8);
     if (pingValue) pingValue.textContent = ping + ' ms';
 
-    // Console messages
     const consoleProgress = displayProgress / 100;
     const targetConsoleIdx = Math.floor(consoleProgress * consoleMessages.length);
     if (targetConsoleIdx > consoleIndex && now - lastConsoleTime > 800) {
@@ -372,7 +344,6 @@ function simulateLoading() {
         addConsoleMessage(msgData.msg, msgData.type);
     }
 
-    // Tips rotation
     tipTimer += 50;
     if (tipTimer >= tipDuration) {
         tipTimer = 0;
@@ -382,17 +353,9 @@ function simulateLoading() {
         tipProgress.style.width = ((tipTimer / tipDuration) * 100) + '%';
     }
 
-    // Side panel updates
-    const memEl = document.getElementById('mem-usage');
-    const cpuEl = document.getElementById('cpu-usage');
-    if (memEl) memEl.textContent = (2.1 + downloadedMB * 0.005).toFixed(1) + ' GB';
-    if (cpuEl) cpuEl.textContent = Math.floor(25 + Math.random() * 20 + displayProgress * 0.3) + '%';
-
-    // Continue or finish
     if (displayProgress < 100) {
         setTimeout(simulateLoading, 50);
     } else {
-        // Loading complete
         finishLoading();
     }
 }
@@ -423,34 +386,15 @@ function finishLoading() {
     }
 }
 
-// Start loading after a short delay
-setTimeout(() => {
-    simulateLoading();
-}, 1500);
+setTimeout(() => { simulateLoading(); }, 1500);
 
-// ============ DYNAMIC SIDE PANEL UPDATES ============
-setInterval(() => {
-    const tickEl = document.getElementById('tick-rate');
-    if (tickEl) {
-        tickEl.textContent = Math.floor(62 + Math.random() * 4);
-    }
-
-    const playerEl = document.getElementById('player-count');
-    if (playerEl) {
-        const count = Math.floor(44 + Math.random() * 6);
-        playerEl.textContent = `${count} / 64`;
-    }
-}, 3000);
-
-// ============ GLITCH EFFECT PERIODIC TRIGGER ============
+// ============ GLITCH EFFECT ============
 function triggerGlitch() {
     const logo = document.querySelector('.logo');
     if (logo) {
         logo.classList.add('glitch-active');
         setTimeout(() => logo.classList.remove('glitch-active'), 200);
     }
-
-    // Random next trigger
     setTimeout(triggerGlitch, Math.random() * 8000 + 5000);
 }
 setTimeout(triggerGlitch, 3000);
