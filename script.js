@@ -112,20 +112,23 @@ document.addEventListener('click', () => {
     if (bgMusic.paused) bgMusic.play().catch(() => {});
 }, { once: true });
 
-// ============ BEAT ANIMATION ============
+// ============ BEAT ELEMENTS ============
 const logoWrapper = document.getElementById('logo-wrapper');
 const logo = logoWrapper.querySelector('.logo');
 const gridBg = document.querySelector('.grid-background');
 const glowEl = document.querySelector('.logo-glow');
+const gifBg = document.querySelector('.gif-background');
+const gifImg = document.getElementById('gif-bg');
 
 const beatDuration = 300;
 const beatPause = 200;
 
-let gridDirection = 0; // 0 = лево-назад, 1 = право-назад
+let gridDirection = 0;
 let logoBeatActive = false;
 let gridBeatActive = false;
+let gifBeatActive = false;
 
-// --- ЛОГОТИП: прыжок вниз под бит ---
+// --- ЛОГОТИП: прыжок вниз ---
 function doLogoBeat() {
     if (logoBeatActive) return;
     logoBeatActive = true;
@@ -139,10 +142,8 @@ function doLogoBeat() {
 
         let ease;
         if (t < 0.4) {
-            // быстро вниз
             ease = t / 0.4;
         } else {
-            // плавно назад
             ease = 1 - ((t - 0.4) / 0.6);
         }
 
@@ -163,7 +164,7 @@ function doLogoBeat() {
     requestAnimationFrame(animate);
 }
 
-// --- СЕТКА (ФОН): наклон лево-назад / право-назад ---
+// --- СЕТКА: наклон лево-назад / право-назад ---
 function doGridBeat() {
     if (gridBeatActive) return;
     gridBeatActive = true;
@@ -184,7 +185,6 @@ function doGridBeat() {
             ease = 1 - ((t - 0.4) / 0.6);
         }
 
-        // rotateY = лево/право, rotateX = назад (наклон от зрителя)
         const rotateY = dir * 4 * ease;
         const rotateX = 3 * ease;
         const scaleGrid = 1 + 0.02 * ease;
@@ -202,9 +202,50 @@ function doGridBeat() {
     requestAnimationFrame(animate);
 }
 
-// --- Пульс свечения и яркости сетки ---
+// --- GIF ФОН: наклон лево-назад / право-назад (синхронно с сеткой) ---
+function doGifBeat() {
+    if (gifBeatActive) return;
+    gifBeatActive = true;
+
+    // Берём то же направление что сетка только что взяла
+    // gridDirection уже переключился, значит текущий dir = противоположный
+    const dir = gridDirection === 0 ? 1 : -1;
+
+    const startTime = performance.now();
+
+    function animate(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / beatDuration, 1);
+
+        let ease;
+        if (t < 0.4) {
+            ease = t / 0.4;
+        } else {
+            ease = 1 - ((t - 0.4) / 0.6);
+        }
+
+        const rotateY = dir * 3 * ease;
+        const rotateX = 2 * ease;
+        const scaleGif = 1.05 + 0.03 * ease;
+        const brightness = 0.2 + 0.08 * ease;
+
+        gifBg.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scaleGif})`;
+        gifImg.style.filter = `brightness(${brightness}) contrast(1.4) saturate(0.5)`;
+
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            gifBg.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1.05)';
+            gifImg.style.filter = 'brightness(0.2) contrast(1.4) saturate(0.5)';
+            gifBeatActive = false;
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+// --- Пульс свечения ---
 function pulseEffects() {
-    // Сетка - вспышка яркости
     if (gridBg) {
         gridBg.style.transition = 'none';
         gridBg.style.backgroundImage = `
@@ -220,7 +261,6 @@ function pulseEffects() {
         }, 60);
     }
 
-    // Glow - вспышка
     if (glowEl) {
         glowEl.style.transition = 'none';
         glowEl.style.opacity = '0.75';
@@ -235,6 +275,7 @@ function pulseEffects() {
 function beatLoop() {
     doLogoBeat();
     doGridBeat();
+    doGifBeat();
     pulseEffects();
     setTimeout(beatLoop, beatDuration + beatPause);
 }
