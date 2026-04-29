@@ -1,219 +1,463 @@
-// ==================== GMOD FUNCTIONS ====================
-function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-    console.log('🎮 Server:', servername);
-    console.log('🗺️ Map:', mapname);
-    console.log('🎯 Gamemode:', gamemode);
-    console.log('👥 Max Players:', maxplayers);
-}
-
-function SetFilesNeeded(needed) {
-    totalFiles = needed;
-    console.log('📦 Files needed:', needed);
-}
-
-function SetFilesTotal(total) {
-    totalFiles = total;
-    document.getElementById('files-count').textContent = `0 / ${total}`;
-    console.log('📦 Total files:', total);
-}
-
-function DownloadingFile(fileName) {
-    currentFileName = fileName;
-    document.getElementById('loading-file').textContent = fileName;
-    filesDownloaded++;
-    updateProgress();
-}
-
-function SetStatusChanged(status) {
-    document.getElementById('loading-file').textContent = status;
-    console.log('📡 Status:', status);
-}
-
-// ==================== PARTICLES ANIMATION ====================
+// ============ PARTICLES SYSTEM ============
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
+let particles = [];
+let mouse = { x: -1000, y: -1000 };
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-const particles = [];
-const particleCount = 120;
+document.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
 
 class Particle {
     constructor() {
         this.reset();
     }
-    
+
     reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.size = Math.random() * 2.5 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.6;
-        this.speedY = (Math.random() - 0.5) * 0.6;
-        this.opacity = Math.random() * 0.6 + 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.targetOpacity = this.opacity;
+        this.color = Math.random() > 0.7 ? '#00d9ff' : (Math.random() > 0.5 ? '#ff4655' : '#ffffff');
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.02 + 0.01;
     }
-    
+
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        this.pulse += this.pulseSpeed;
+
+        // Mouse interaction
+        const dx = this.x - mouse.x;
+        const dy = this.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const interactionRadius = 150;
+
+        if (dist < interactionRadius) {
+            const force = (interactionRadius - dist) / interactionRadius;
+            this.x += (dx / dist) * force * 2;
+            this.y += (dy / dist) * force * 2;
+            this.targetOpacity = Math.min(1, this.opacity + 0.3);
+        } else {
+            this.targetOpacity = this.opacity;
+        }
+
+        // Smooth opacity transition
+        const currentOpacity = parseFloat(this._currentOpacity || this.opacity);
+        this._currentOpacity = currentOpacity + (this.targetOpacity - currentOpacity) * 0.05;
+
+        // Wrap around screen
+        if (this.x < -10) this.x = canvas.width + 10;
+        if (this.x > canvas.width + 10) this.x = -10;
+        if (this.y < -10) this.y = canvas.height + 10;
+        if (this.y > canvas.height + 10) this.y = -10;
     }
-    
+
     draw() {
-        ctx.fillStyle = `rgba(0, 217, 255, ${this.opacity})`;
+        const pulseOpacity = this._currentOpacity * (0.7 + Math.sin(this.pulse) * 0.3);
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = pulseOpacity;
         ctx.fill();
+
+        // Glow effect for larger particles
+        if (this.size > 1.5) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = pulseOpacity * 0.15;
+            ctx.fill();
+        }
     }
 }
 
+// Create particles
+const particleCount = Math.min(120, Math.floor((canvas.width * canvas.height) / 12000));
 for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
 }
 
-function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-    });
-    
-    requestAnimationFrame(animateParticles);
+// Draw connections between nearby particles
+function drawConnections() {
+    const maxDist = 120;
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < maxDist) {
+                const opacity = (1 - dist / maxDist) * 0.12;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.strokeStyle = '#00d9ff';
+                ctx.globalAlpha = opacity;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        }
+    }
 }
 
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    drawConnections();
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(animateParticles);
+}
 animateParticles();
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+// ============ SERVER TIME ============
+function updateServerTime() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('ru-RU', { hour12: false });
+    const timeEl = document.getElementById('server-time');
+    const consoleTimeEl = document.getElementById('console-time');
+    if (timeEl) timeEl.textContent = timeStr;
+    if (consoleTimeEl) consoleTimeEl.textContent = timeStr;
+}
+setInterval(updateServerTime, 1000);
+updateServerTime();
 
-// ==================== MUSIC AUTO-PLAY ====================
+// ============ MUSIC CONTROL ============
+const musicToggle = document.getElementById('music-toggle');
 const bgMusic = document.getElementById('bg-music');
-bgMusic.volume = 0.5;
+let isMuted = false;
 
-// Автоматический запуск музыки
-window.addEventListener('load', () => {
-    bgMusic.play().catch(err => {
-        console.log('⚠️ Автозапуск музыки заблокирован');
-        // Попытка запуска при первом клике
-        document.addEventListener('click', function startMusic() {
-            bgMusic.play().then(() => {
-                console.log('🎵 Музыка запущена!');
-            });
-            document.removeEventListener('click', startMusic);
-        }, { once: true });
-    });
-});
-
-// Автоматический повтор
-bgMusic.addEventListener('ended', () => {
-    bgMusic.currentTime = 0;
-    bgMusic.play();
-});
-
-// Пауза при смене вкладки
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        bgMusic.pause();
-    } else {
+// Attempt autoplay
+document.addEventListener('click', () => {
+    if (bgMusic.paused) {
         bgMusic.play().catch(() => {});
     }
-});
+}, { once: true });
 
-// ==================== LOADING SIMULATION ====================
-let currentProgress = 0;
-let filesDownloaded = 0;
-let totalFiles = 347;
-let currentFileName = 'Подключение к серверу...';
-let downloadedMB = 0;
+if (musicToggle) {
+    musicToggle.addEventListener('click', () => {
+        isMuted = !isMuted;
+        bgMusic.muted = isMuted;
+        musicToggle.classList.toggle('muted', isMuted);
+    });
+}
 
+// ============ LOADING SIMULATION ============
 const loadingPercent = document.getElementById('loading-percent');
 const progressBar = document.getElementById('progress-bar');
+const progressEdge = document.getElementById('progress-edge');
+const loadingFile = document.getElementById('loading-file');
 const filesCount = document.getElementById('files-count');
 const downloadSpeed = document.getElementById('download-speed');
 const downloadedSize = document.getElementById('downloaded-size');
 const pingValue = document.getElementById('ping-value');
+const tipText = document.getElementById('tip-text');
+const tipProgress = document.getElementById('tip-progress');
 
-// Список файлов для симуляции
 const files = [
-    'models/city/buildings_01.mdl',
-    'models/city/buildings_02.mdl',
-    'models/city/buildings_03.mdl',
-    'materials/textures/roads.vtf',
-    'materials/textures/concrete.vtf',
-    'materials/textures/graffiti.vtf',
-    'sound/ambient/city_wind.wav',
-    'sound/ambient/rain.wav',
-    'sound/ambient/thunder.wav',
-    'scripts/game_sounds.txt',
-    'scripts/weapons_config.lua',
-    'scripts/npc_ai.lua',
-    'maps/gm_necrograd_downtown.bsp',
-    'models/vehicles/police_car.mdl',
-    'models/vehicles/taxi.mdl',
-    'models/props/streetlight.mdl',
-    'models/props/trash_bin.mdl',
-    'materials/skybox/night_sky.vtf',
-    'sound/music/background_01.mp3',
-    'sound/weapons/gunshot.wav',
+    'maps/rp_necrograd_v4.bsp',
+    'materials/necro/buildings/warehouse_01.vtf',
+    'materials/necro/buildings/hospital_wall.vmt',
+    'models/props/streetlight_broken.mdl',
+    'models/vehicles/uaz_469.mdl',
+    'models/weapons/w_knife_custom.mdl',
+    'sound/ambient/city_night_loop.wav',
+    'sound/ambient/wind_howl.wav',
+    'sound/music/loading_theme.mp3',
+    'materials/necro/skybox/night_sky_rt.vtf',
+    'materials/necro/skybox/night_sky_lf.vtf',
+    'materials/necro/ground/asphalt_cracked.vtf',
+    'materials/necro/ground/dirt_wet.vtf',
+    'models/props/dumpster_rust.mdl',
+    'models/props/barrel_toxic.mdl',
+    'models/props/fence_chain.mdl',
+    'lua/autorun/server/sv_necro_core.lua',
+    'lua/autorun/server/sv_economy.lua',
+    'lua/autorun/server/sv_inventory.lua',
+    'lua/autorun/client/cl_hud_main.lua',
+    'lua/autorun/client/cl_scoreboard.lua',
+    'lua/entities/npc_trader/init.lua',
+    'lua/entities/npc_quest/shared.lua',
+    'materials/necro/ui/hud_bg.png',
+    'materials/necro/ui/inventory_slot.png',
+    'materials/necro/vehicles/uaz_skin_01.vtf',
+    'materials/necro/vehicles/gaz_66_camo.vtf',
+    'models/characters/citizen_male_01.mdl',
+    'models/characters/citizen_female_03.mdl',
+    'models/characters/police_officer.mdl',
+    'sound/weapons/ak47_fire_01.wav',
+    'sound/weapons/pistol_reload.wav',
+    'sound/ui/menu_click.wav',
+    'sound/ui/notification.wav',
+    'lua/autorun/server/sv_jobs.lua',
+    'lua/autorun/server/sv_housing.lua',
+    'lua/autorun/client/cl_chat_custom.lua',
+    'materials/necro/effects/blood_splatter.vtf',
+    'materials/necro/effects/rain_drop.vtf',
+    'models/props/radio_old.mdl',
+    'models/props/tv_broken.mdl',
+    'lua/autorun/server/sv_anticheat.lua',
+    'data/necrograd/config/settings.json',
+    'data/necrograd/maps/spawn_points.dat',
+    'resource/fonts/necrograd_main.ttf',
+    'materials/necro/decals/graffiti_01.vtf',
+    'materials/necro/decals/blood_01.vtf',
+    'models/props/crate_military.mdl',
+    'sound/ambient/rain_heavy.wav',
+    'lua/autorun/shared/sh_config.lua'
 ];
 
-function updateProgress() {
-    const progress = (filesDownloaded / totalFiles) * 100;
-    currentProgress = Math.min(progress, 100);
-    
-    progressBar.style.width = currentProgress + '%';
-    loadingPercent.textContent = Math.floor(currentProgress) + '%';
-    filesCount.textContent = `${filesDownloaded} / ${totalFiles}`;
-    
-    // Обновление скачанного размера
-    downloadedMB += Math.random() * 2 + 0.5;
-    downloadedSize.textContent = downloadedMB.toFixed(1) + ' MB';
+const tips = [
+    'Нажмите F1, чтобы открыть меню помощи на сервере',
+    'Используйте /report для связи с администрацией',
+    'Не забывайте отыгрывать своего персонажа в любой ситуации',
+    'Экономьте ресурсы — в Necrograd выживает сильнейший',
+    'Присоединяйтесь к фракции для получения бонусов',
+    'Нажмите TAB для просмотра списка игроков',
+    'Торговля между игроками — основа экономики сервера',
+    'Исследуйте заброшенные здания — там можно найти ценный лут',
+    'Берегите своё здоровье — аптечки стоят дорого',
+    'Уважайте других игроков и правила сервера',
+    'Используйте рацию для связи с союзниками',
+    'Ночью на улицах опаснее — будьте осторожны',
+    'Прокачивайте навыки для открытия новых возможностей',
+    'Постройте убежище, чтобы сохранить свои вещи',
+    'Следите за событиями сервера в Discord'
+];
+
+const consoleMessages = [
+    { msg: 'Подключение к серверу Necrograd...', type: 'info' },
+    { msg: 'TCP/IP соединение установлено', type: 'success' },
+    { msg: 'Аутентификация Steam ID...', type: 'info' },
+    { msg: 'Steam ID подтверждён', type: 'success' },
+    { msg: 'Загрузка конфигурации сервера...', type: 'info' },
+    { msg: 'Получение списка файлов...', type: 'info' },
+    { msg: 'Найдено 50 файлов для загрузки', type: 'warning' },
+    { msg: 'Начало загрузки ресурсов...', type: 'info' },
+    { msg: 'Загрузка карты rp_necrograd_v4...', type: 'info' },
+    { msg: 'Инициализация Lua модулей...', type: 'info' },
+    { msg: 'Загрузка текстур окружения...', type: 'info' },
+    { msg: 'Компиляция шейдеров...', type: 'info' },
+    { msg: 'Загрузка моделей объектов...', type: 'info' },
+    { msg: 'Загрузка звуковых файлов...', type: 'info' },
+    { msg: 'Синхронизация с базой данных...', type: 'info' },
+    { msg: 'Загрузка данных персонажа...', type: 'info' },
+    { msg: 'Кэширование ресурсов...', type: 'info' },
+    { msg: 'Оптимизация текстур...', type: 'info' },
+    { msg: 'Все файлы загружены успешно', type: 'success' },
+    { msg: 'Подготовка к входу на сервер...', type: 'success' }
+];
+
+let currentProgress = 0;
+let targetProgress = 0;
+let currentFileIndex = 0;
+let totalFiles = files.length;
+let currentTipIndex = 0;
+let tipTimer = 0;
+const tipDuration = 8000;
+let consoleIndex = 0;
+let lastConsoleTime = 0;
+
+// Simulated stats
+let downloadedMB = 0;
+let totalMB = 347.2;
+
+function getTimestamp() {
+    const now = new Date();
+    return now.toLocaleTimeString('ru-RU', { hour12: false });
 }
 
-// Симуляция скачивания файлов
-setInterval(() => {
-    if (filesDownloaded < totalFiles) {
-        const randomFile = files[Math.floor(Math.random() * files.length)];
-        DownloadingFile(randomFile);
-        
-        // Случайная скорость загрузки
-        const speed = (Math.random() * 800 + 200).toFixed(0);
-        downloadSpeed.textContent = speed + ' KB/s';
-    } else {
-        downloadSpeed.textContent = '0 KB/s';
-        document.getElementById('loading-file').textContent = '✓ Загрузка завершена!';
+function addConsoleMessage(msg, type) {
+    const container = document.getElementById('console-messages');
+    if (!container) return;
+
+    const line = document.createElement('div');
+    line.className = 'console-line';
+    line.innerHTML = `<span class="console-timestamp">[${getTimestamp()}]</span> <span class="console-msg ${type}">${msg}</span>`;
+    container.appendChild(line);
+
+    // Keep only last 3 messages visible
+    while (container.children.length > 3) {
+        container.removeChild(container.firstChild);
     }
-}, 150);
 
-// Обновление пинга
-setInterval(() => {
-    const ping = Math.floor(Math.random() * 40 + 10);
-    pingValue.textContent = ping + ' ms';
-}, 2000);
+    container.scrollTop = container.scrollHeight;
+}
 
-// ==================== TIPS ROTATION ====================
-let currentTipIndex = 0;
-const tipText = document.getElementById('tip-text');
-
-setInterval(() => {
+function updateTip() {
     currentTipIndex = (currentTipIndex + 1) % tips.length;
-    tipText.style.opacity = '0';
-    setTimeout(() => {
-        tipText.textContent = tips[currentTipIndex];
-        tipText.style.opacity = '1';
-    }, 300);
-}, 7000);
+    const tipEl = document.getElementById('tip-text');
+    if (tipEl) {
+        tipEl.style.opacity = '0';
+        setTimeout(() => {
+            tipEl.textContent = tips[currentTipIndex];
+            tipEl.style.opacity = '0.9';
+        }, 300);
+    }
+}
 
-// ==================== CONSOLE STYLING ====================
-console.log('%c╔═══════════════════════════════════════════╗', 'color: #00d9ff; font-weight: bold;');
-console.log('%c║     🎮 NECROGRAD LOADING SCREEN 🎮      ║', 'color: #00d9ff; font-size: 18px; font-weight: bold;');
-console.log('%c╚═══════════════════════════════════════════╝', 'color: #00d9ff; font-weight: bold;');
-console.log('%c\n🎵 Музыка: Автоматический повтор активен', 'color: #00ff88; font-weight: bold;');
-console.log('%c🎬 GIF: Воспроизводится в фоне', 'color: #00d9ff; font-weight: bold;');
-console.log('%c📡 GMod Functions: Готовы к использованию', 'color: #00d9ff;');
-console.log('%c\n✨ Минималистичный дизайн загружен', 'color: #ff4655; font-weight: bold;');
+function formatSpeed(kbps) {
+    if (kbps > 1024) {
+        return (kbps / 1024).toFixed(1) + ' MB/s';
+    }
+    return Math.round(kbps) + ' KB/s';
+}
+
+function simulateLoading() {
+    const now = Date.now();
+
+    // Increment progress with variable speed
+    if (targetProgress < 100) {
+        const increment = Math.random() * 2 + 0.3;
+        targetProgress = Math.min(100, targetProgress + increment);
+    }
+
+    // Smooth progress
+    currentProgress += (targetProgress - currentProgress) * 0.08;
+    const displayProgress = Math.min(Math.round(currentProgress), 100);
+
+    // Update UI
+    if (loadingPercent) loadingPercent.textContent = displayProgress + '%';
+    if (progressBar) progressBar.style.width = displayProgress + '%';
+    if (progressEdge) progressEdge.style.left = `calc(${displayProgress}% - 6px)`;
+
+    // Update file name
+    const fileIdx = Math.min(Math.floor((displayProgress / 100) * totalFiles), totalFiles - 1);
+    if (fileIdx !== currentFileIndex && fileIdx < totalFiles) {
+        currentFileIndex = fileIdx;
+        if (loadingFile) loadingFile.innerHTML = `<span class="file-icon">📁</span> ${files[currentFileIndex]}`;
+    }
+
+    // Files count
+    const loadedFiles = Math.min(Math.floor((displayProgress / 100) * totalFiles), totalFiles);
+    if (filesCount) filesCount.textContent = `${loadedFiles} / ${totalFiles}`;
+
+    // Download speed
+    const speed = Math.random() * 800 + 200 + (Math.sin(now * 0.001) * 300);
+    if (downloadSpeed) downloadSpeed.textContent = formatSpeed(speed);
+
+    // Downloaded size
+    downloadedMB = (displayProgress / 100) * totalMB;
+    if (downloadedSize) downloadedSize.textContent = downloadedMB.toFixed(1) + ' MB';
+
+    // Ping
+    const ping = Math.floor(Math.random() * 15 + 28 + Math.sin(now * 0.0005) * 8);
+    if (pingValue) pingValue.textContent = ping + ' ms';
+
+    // Console messages
+    const consoleProgress = displayProgress / 100;
+    const targetConsoleIdx = Math.floor(consoleProgress * consoleMessages.length);
+    if (targetConsoleIdx > consoleIndex && now - lastConsoleTime > 800) {
+        consoleIndex = targetConsoleIdx;
+        lastConsoleTime = now;
+        const msgData = consoleMessages[Math.min(consoleIndex, consoleMessages.length - 1)];
+        addConsoleMessage(msgData.msg, msgData.type);
+    }
+
+    // Tips rotation
+    tipTimer += 50;
+    if (tipTimer >= tipDuration) {
+        tipTimer = 0;
+        updateTip();
+    }
+    if (tipProgress) {
+        tipProgress.style.width = ((tipTimer / tipDuration) * 100) + '%';
+    }
+
+    // Side panel updates
+    const memEl = document.getElementById('mem-usage');
+    const cpuEl = document.getElementById('cpu-usage');
+    if (memEl) memEl.textContent = (2.1 + downloadedMB * 0.005).toFixed(1) + ' GB';
+    if (cpuEl) cpuEl.textContent = Math.floor(25 + Math.random() * 20 + displayProgress * 0.3) + '%';
+
+    // Continue or finish
+    if (displayProgress < 100) {
+        setTimeout(simulateLoading, 50);
+    } else {
+        // Loading complete
+        finishLoading();
+    }
+}
+
+function finishLoading() {
+    if (loadingFile) loadingFile.innerHTML = '<span class="file-icon">✅</span> Загрузка завершена!';
+    addConsoleMessage('Добро пожаловать в Necrograd!', 'success');
+
+    const statusDot = document.querySelector('.status-indicator');
+    if (statusDot) {
+        statusDot.style.animation = 'none';
+        statusDot.style.background = '#00ff64';
+        statusDot.style.mask = 'none';
+        statusDot.style.webkitMask = 'none';
+        statusDot.style.borderRadius = '50%';
+        statusDot.style.width = '12px';
+        statusDot.style.height = '12px';
+        statusDot.style.boxShadow = '0 0 15px rgba(0, 255, 100, 0.8)';
+    }
+
+    const loadingLabel = document.querySelector('.loading-label');
+    if (loadingLabel) loadingLabel.textContent = 'ГОТОВО';
+
+    const percentEl = document.getElementById('loading-percent');
+    if (percentEl) {
+        percentEl.style.color = '#00ff64';
+        percentEl.style.textShadow = '0 0 20px rgba(0, 255, 100, 0.6)';
+    }
+}
+
+// Start loading after a short delay
+setTimeout(() => {
+    simulateLoading();
+}, 1500);
+
+// ============ DYNAMIC SIDE PANEL UPDATES ============
+setInterval(() => {
+    const tickEl = document.getElementById('tick-rate');
+    if (tickEl) {
+        tickEl.textContent = Math.floor(62 + Math.random() * 4);
+    }
+
+    const playerEl = document.getElementById('player-count');
+    if (playerEl) {
+        const count = Math.floor(44 + Math.random() * 6);
+        playerEl.textContent = `${count} / 64`;
+    }
+}, 3000);
+
+// ============ GLITCH EFFECT PERIODIC TRIGGER ============
+function triggerGlitch() {
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.classList.add('glitch-active');
+        setTimeout(() => logo.classList.remove('glitch-active'), 200);
+    }
+
+    // Random next trigger
+    setTimeout(triggerGlitch, Math.random() * 8000 + 5000);
+}
+setTimeout(triggerGlitch, 3000);
+
+// ============ KEYBOARD SHORTCUT ============
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'm' || e.key === 'M' || e.key === 'ь' || e.key === 'Ь') {
+        if (musicToggle) musicToggle.click();
+    }
+});
