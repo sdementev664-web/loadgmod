@@ -75,16 +75,18 @@ body {
 /* ============ GRID ============ */
 .grid-background {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
     z-index: 1;
     pointer-events: none;
     background-image:
         linear-gradient(var(--grid-color) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: var(--grid-size) var(--grid-size);
+    transform-origin: center center;
+    will-change: transform;
 }
 
 .vignette {
@@ -150,19 +152,13 @@ body {
         transparent 80%
     );
     filter: blur(100px);
-    opacity: 0.4;
-    animation: glowPulse 5s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.15); }
+    opacity: 0.35;
+    will-change: opacity;
 }
 
 .logo-wrapper {
     position: relative;
     z-index: 2;
-    perspective: 800px;
     display: inline-block;
 }
 
@@ -172,53 +168,7 @@ body {
     letter-spacing: 12px;
     text-transform: uppercase;
     display: inline-block;
-    transform-style: preserve-3d;
-    animation: beatBounce 1.6s ease-in-out infinite;
-}
-
-/* ============ BEAT ANIMATION ============ */
-/*
-  Ритм:
-  0%        — стоим (центр)
-  12.5%     — лево + вперёд (наклон влево, приближение)
-  25%       — возврат в центр
-  25%-50%   — пауза 0.4с (при 1.6s цикле = 25%)
-  50%       — стоим (центр)  
-  62.5%     — право + вперёд (наклон вправо, приближение)
-  75%       — возврат в центр
-  75%-100%  — пауза 0.4с
-*/
-
-@keyframes beatBounce {
-    0% {
-        transform: rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px);
-    }
-    6% {
-        transform: rotateY(-8deg) rotateZ(-3deg) scale(1.06) translateZ(30px);
-    }
-    12% {
-        transform: rotateY(-12deg) rotateZ(-4deg) scale(1.08) translateZ(40px);
-    }
-    22% {
-        transform: rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px);
-    }
-    /* пауза */
-    50% {
-        transform: rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px);
-    }
-    56% {
-        transform: rotateY(8deg) rotateZ(3deg) scale(1.06) translateZ(30px);
-    }
-    62% {
-        transform: rotateY(12deg) rotateZ(4deg) scale(1.08) translateZ(40px);
-    }
-    72% {
-        transform: rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px);
-    }
-    /* пауза */
-    100% {
-        transform: rotateY(0deg) rotateZ(0deg) scale(1) translateZ(0px);
-    }
+    will-change: transform;
 }
 
 .logo-text {
@@ -228,7 +178,7 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     position: relative;
-    transition: filter 0.2s;
+    transition: filter 0.15s;
 }
 
 .logo-text.accent {
@@ -239,13 +189,13 @@ body {
     filter: drop-shadow(0 0 40px var(--glow-blue));
 }
 
-/* Beat glow sync — подсветка усиливается на ударе */
+/* Beat glow на логотипе при ударе */
 .logo-wrapper.beat-hit .logo-text {
-    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+    filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.7));
 }
 
 .logo-wrapper.beat-hit .logo-text.accent {
-    filter: drop-shadow(0 0 60px var(--glow-blue)) drop-shadow(0 0 30px rgba(0, 217, 255, 0.8));
+    filter: drop-shadow(0 0 60px var(--glow-blue)) drop-shadow(0 0 35px rgba(0, 217, 255, 0.9));
 }
 
 /* ============ FOOTER / LOADING ============ */
