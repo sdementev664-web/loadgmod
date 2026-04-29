@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'VCR OSD Mono';
+    src: url('VCR_OSD_MONO.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -23,7 +30,7 @@
 }
 
 body {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'VCR OSD Mono', monospace;
     background: var(--bg-darker);
     color: var(--text-primary);
     overflow: hidden;
@@ -163,8 +170,9 @@ body {
 }
 
 .logo {
+    font-family: 'VCR OSD Mono', monospace;
     font-size: 110px;
-    font-weight: 900;
+    font-weight: normal;
     letter-spacing: 12px;
     text-transform: uppercase;
     display: inline-block;
@@ -239,16 +247,16 @@ body {
 }
 
 .loading-label {
-    font-size: 12px;
-    font-weight: 700;
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 14px;
     letter-spacing: 4px;
     color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .loading-percentage {
-    font-size: 26px;
-    font-weight: 800;
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 28px;
     color: var(--accent-blue);
     text-shadow: 0 0 20px var(--glow-blue);
     min-width: 70px;
@@ -326,11 +334,11 @@ body {
     .logo { font-size: 56px; letter-spacing: 6px; }
     .container { padding: 20px; }
     .footer { max-width: 100%; }
-    .loading-percentage { font-size: 20px; }
+    .loading-percentage { font-size: 22px; }
 }
 
 @media (max-width: 480px) {
     .logo { font-size: 38px; letter-spacing: 3px; }
-    .loading-label { font-size: 10px; letter-spacing: 2px; }
+    .loading-label { font-size: 11px; letter-spacing: 2px; }
     .loading-percentage { font-size: 18px; }
 }
