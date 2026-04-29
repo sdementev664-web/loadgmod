@@ -13,9 +13,14 @@
     <div class="gif-background">
         <img src="background.gif" alt="Background" id="gif-bg">
         <div class="gif-overlay"></div>
-        <div class="scanlines"></div>
-        <div class="vignette"></div>
     </div>
+
+    <!-- Grid Background (тетрадка в клеточку) -->
+    <div class="grid-background"></div>
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
 
     <!-- Particles -->
     <canvas id="particles"></canvas>
@@ -30,41 +35,6 @@
     <div class="corner-decor top-right"></div>
     <div class="corner-decor bottom-left"></div>
     <div class="corner-decor bottom-right"></div>
-
-    <!-- Side Info Panels -->
-    <div class="side-panel left-panel">
-        <div class="panel-line"></div>
-        <div class="panel-data">
-            <span class="data-label">SYS</span>
-            <span class="data-value" id="sys-status">ONLINE</span>
-        </div>
-        <div class="panel-data">
-            <span class="data-label">MEM</span>
-            <span class="data-value" id="mem-usage">2.4 GB</span>
-        </div>
-        <div class="panel-data">
-            <span class="data-label">CPU</span>
-            <span class="data-value" id="cpu-usage">34%</span>
-        </div>
-        <div class="panel-line"></div>
-    </div>
-
-    <div class="side-panel right-panel">
-        <div class="panel-line"></div>
-        <div class="panel-data">
-            <span class="data-label">MAP</span>
-            <span class="data-value">rp_necrograd</span>
-        </div>
-        <div class="panel-data">
-            <span class="data-label">PLAYERS</span>
-            <span class="data-value" id="player-count">47 / 64</span>
-        </div>
-        <div class="panel-data">
-            <span class="data-label">TICK</span>
-            <span class="data-value" id="tick-rate">64</span>
-        </div>
-        <div class="panel-line"></div>
-    </div>
 
     <!-- Main Content -->
     <div class="container">
@@ -98,8 +68,7 @@
             <div class="logo-section">
                 <div class="logo-glow"></div>
                 <div class="logo-glow secondary"></div>
-                
-                <!-- Orbiting ring -->
+
                 <div class="orbit-ring">
                     <div class="orbit-dot"></div>
                 </div>
@@ -108,25 +77,6 @@
                     <div class="logo" data-text="NECROGRAD">
                         <span class="logo-text glitch" data-text="NECRO">NECRO</span>
                         <span class="logo-text accent glitch" data-text="GRAD">GRAD</span>
-                    </div>
-                    
-                    <!-- Decorative lines -->
-                    <div class="logo-lines">
-                        <div class="h-line left"></div>
-                        <div class="diamond"></div>
-                        <div class="h-line right"></div>
-                    </div>
-                    
-                    <div class="logo-tagline">
-                        <span class="tagline-bracket">[</span>
-                        <span class="tagline-text">DARK ROLEPLAY SERVER</span>
-                        <span class="tagline-bracket">]</span>
-                    </div>
-
-                    <div class="logo-subtitle">
-                        <span class="sub-dash">——</span>
-                        <span>ENTER THE DARKNESS</span>
-                        <span class="sub-dash">——</span>
                     </div>
                 </div>
             </div>
@@ -163,7 +113,6 @@
                     </div>
                 </div>
 
-                <!-- Multi-layer Progress Bar -->
                 <div class="progress-wrapper">
                     <div class="progress-markers">
                         <span class="marker" style="left: 25%">25</span>
