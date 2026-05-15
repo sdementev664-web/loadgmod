@@ -25,8 +25,6 @@
     --glow-primary: rgba(255, 70, 85, 0.5);
     --glow-blue: rgba(77, 138, 255, 0.6);
     --glow-secondary: rgba(77, 138, 255, 0.3);
-    --grid-color: rgba(77, 138, 255, 0.07);
-    --grid-size: 40px;
 }
 
 body {
@@ -42,23 +40,21 @@ body {
 /* ============ GIF BACKGROUND ============ */
 .gif-background {
     position: fixed;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
     z-index: 0;
     overflow: hidden;
-    transform-origin: center center;
-    transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1.05);
     will-change: transform;
+    transition: none;
 }
 
 .gif-background img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.2) contrast(1.4) saturate(0.5);
-    will-change: filter;
+    filter: brightness(0.25) contrast(1.3) saturate(0.4) blur(2px);
 }
 
 .gif-overlay {
@@ -68,41 +64,70 @@ body {
     width: 100%;
     height: 100%;
     background:
-        radial-gradient(ellipse at 30% 50%, rgba(255, 70, 85, 0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 50%, rgba(77, 138, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 30% 40%, rgba(255, 70, 85, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(77, 138, 255, 0.05) 0%, transparent 50%),
         linear-gradient(to bottom,
-            rgba(5, 8, 16, 0.6) 0%,
-            rgba(5, 8, 16, 0.3) 40%,
-            rgba(5, 8, 16, 0.5) 60%,
+            rgba(5, 8, 16, 0.5) 0%,
+            rgba(5, 8, 16, 0.2) 30%,
+            rgba(5, 8, 16, 0.15) 50%,
+            rgba(5, 8, 16, 0.4) 70%,
             rgba(5, 8, 16, 0.95) 100%
         );
     pointer-events: none;
 }
 
-/* ============ GRID ============ */
-.grid-background {
+/* ============ FILM GRAIN ============ */
+.film-grain {
     position: fixed;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 1;
     pointer-events: none;
-    background-image:
-        linear-gradient(var(--grid-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size: var(--grid-size) var(--grid-size);
-    transform-origin: center center;
-    will-change: transform;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    animation: grainShift 0.1s steps(1) infinite;
 }
 
+@keyframes grainShift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, -2px); }
+    100% { transform: translate(2px, 2px); }
+}
+
+/* ============ CINEMATIC BARS ============ */
+.cinematic-bar {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #000;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.cinematic-bar-top {
+    top: 0;
+    background: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+.cinematic-bar-bottom {
+    bottom: 0;
+    background: linear-gradient(to top, #000 60%, transparent);
+}
+
+/* ============ VIGNETTE ============ */
 .vignette {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.75) 100%);
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
     pointer-events: none;
     z-index: 2;
 }
@@ -128,7 +153,93 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 40px;
+    padding: 80px 50px 50px;
+}
+
+/* ============ CORNER INFO ============ */
+.corner-info {
+    position: fixed;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.corner-info.top-left {
+    top: 75px;
+    left: 40px;
+}
+
+.corner-info.top-right {
+    top: 75px;
+    right: 40px;
+    align-items: flex-end;
+}
+
+.corner-info.bottom-left {
+    bottom: 30px;
+    left: 40px;
+}
+
+.corner-info.bottom-right {
+    bottom: 30px;
+    right: 40px;
+    align-items: flex-end;
+}
+
+.corner-line {
+    width: 30px;
+    height: 2px;
+    background: var(--accent-blue);
+    margin-bottom: 6px;
+    box-shadow: 0 0 8px var(--glow-blue);
+}
+
+.corner-line.right {
+    margin-top: 6px;
+    margin-bottom: 0;
+    align-self: flex-end;
+}
+
+.corner-text {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.corner-sub {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+}
+
+.social-icons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.social-tag {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.social-divider {
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 10px;
+}
+
+.version-tag {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.15);
 }
 
 /* ============ LOGO ============ */
@@ -149,33 +260,53 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 600px;
-    height: 400px;
+    width: 700px;
+    height: 500px;
     background: radial-gradient(
         ellipse,
-        var(--glow-primary) 0%,
-        rgba(168, 85, 247, 0.15) 30%,
-        var(--glow-secondary) 60%,
+        rgba(77, 138, 255, 0.12) 0%,
+        rgba(168, 85, 247, 0.06) 30%,
+        rgba(255, 70, 85, 0.04) 60%,
         transparent 80%
     );
-    filter: blur(100px);
-    opacity: 0.35;
-    will-change: opacity;
+    filter: blur(80px);
+    opacity: 0.5;
+    will-change: opacity, transform;
+    animation: none;
+}
+
+.logo-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 350px;
+    pointer-events: none;
+    opacity: 0.3;
+    will-change: transform;
+}
+
+.logo-ring svg {
+    width: 100%;
+    height: 100%;
 }
 
 .logo-wrapper {
     position: relative;
     z-index: 2;
     display: inline-block;
+    will-change: transform;
 }
 
 .logo {
     font-family: 'VCR OSD Mono', monospace;
-    font-size: 110px;
+    font-size: 120px;
     font-weight: normal;
-    letter-spacing: 12px;
+    letter-spacing: 14px;
     text-transform: uppercase;
     display: inline-block;
+    line-height: 1;
     will-change: transform;
 }
 
@@ -186,7 +317,7 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     position: relative;
-    transition: filter 0.15s;
+    will-change: transform, filter;
 }
 
 .logo-text.accent {
@@ -194,35 +325,79 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 40px var(--glow-blue));
+    filter: drop-shadow(0 0 30px var(--glow-blue));
 }
 
-.logo-wrapper.beat-hit .logo-text {
-    filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.7));
+.logo-subtitle {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
 
-.logo-wrapper.beat-hit .logo-text.accent {
-    filter: drop-shadow(0 0 60px var(--glow-blue)) drop-shadow(0 0 35px rgba(77, 138, 255, 0.9));
+.subtitle-dash {
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+.subtitle-text {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 6px;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
 }
 
 /* ============ FOOTER / LOADING ============ */
 .footer {
     width: 100%;
     max-width: 700px;
-    animation: slideUp 0.8s ease 0.5s backwards;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.8s ease 0.3s forwards;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ============ TIP SECTION ============ */
+.tip-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 0 4px;
+    min-height: 40px;
+}
+
+.tip-icon {
+    color: var(--accent-blue);
+    opacity: 0.5;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.tip-text {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 1.6;
+    transition: opacity 0.4s ease;
+}
+
+/* ============ LOADING SECTION ============ */
 .loading-section {
-    background: rgba(8, 12, 24, 0.8);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 20px 24px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
@@ -236,42 +411,42 @@ body {
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
-    opacity: 0.4;
+    opacity: 0.3;
 }
 
 .loading-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .loading-label {
     font-family: 'VCR OSD Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 4px;
-    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 6px;
+    color: rgba(255, 255, 255, 0.25);
     text-transform: uppercase;
 }
 
 .loading-percentage {
     font-family: 'VCR OSD Mono', monospace;
-    font-size: 28px;
+    font-size: 26px;
     color: var(--accent-blue);
     text-shadow: 0 0 20px var(--glow-blue);
     min-width: 70px;
     text-align: right;
+    will-change: contents;
 }
 
 /* Progress Bar */
 .progress-container {
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 6px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 2px;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .progress-bar {
@@ -279,14 +454,14 @@ body {
     background: linear-gradient(90deg, #ff8c00, #ff4655, #a855f7, #4d8aff, #00ff88);
     background-size: 300% 100%;
     animation: progressColorShift 4s linear infinite;
-    border-radius: 6px;
+    border-radius: 2px;
     width: 0%;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     box-shadow:
-        0 0 12px rgba(255, 140, 0, 0.4),
-        0 0 20px rgba(168, 85, 247, 0.3),
-        0 0 30px rgba(77, 138, 255, 0.3);
+        0 0 10px rgba(255, 140, 0, 0.3),
+        0 0 18px rgba(168, 85, 247, 0.2),
+        0 0 25px rgba(77, 138, 255, 0.2);
 }
 
 @keyframes progressColorShift {
@@ -298,17 +473,17 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    width: 80px;
+    width: 60px;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6));
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
     animation: progressShine 1.5s infinite;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 2px 2px 0;
 }
 
 @keyframes progressShine {
-    0% { opacity: 0; transform: translateX(-80px); }
+    0% { opacity: 0; transform: translateX(-60px); }
     50% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(40px); }
+    100% { opacity: 0; transform: translateX(30px); }
 }
 
 .progress-stripes {
@@ -318,27 +493,90 @@ body {
     width: 100%;
     height: 100%;
     background: repeating-linear-gradient(
-        -45deg, transparent, transparent 5px,
-        rgba(255, 255, 255, 0.07) 5px, rgba(255, 255, 255, 0.07) 10px
+        -45deg, transparent, transparent 4px,
+        rgba(255, 255, 255, 0.06) 4px, rgba(255, 255, 255, 0.06) 8px
     );
-    animation: stripesMove 0.8s linear infinite;
+    animation: stripesMove 0.6s linear infinite;
 }
 
 @keyframes stripesMove {
     0% { transform: translateX(0); }
-    100% { transform: translateX(14px); }
+    100% { transform: translateX(11px); }
+}
+
+.progress-segments {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.segment-mark {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Loading bottom */
+.loading-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.loading-status {
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+}
+
+.loading-spinner {
+    display: flex;
+    gap: 4px;
+}
+
+.spinner-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    opacity: 0.3;
+    animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.spinner-dot:nth-child(2) { animation-delay: 0.2s; }
+.spinner-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.8; transform: scale(1.2); }
 }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 768px) {
     .logo { font-size: 56px; letter-spacing: 6px; }
-    .container { padding: 20px; }
+    .container { padding: 70px 20px 30px; }
     .footer { max-width: 100%; }
-    .loading-percentage { font-size: 22px; }
+    .loading-percentage { font-size: 20px; }
+    .corner-info.top-left, .corner-info.top-right { top: 65px; }
+    .corner-info.top-left { left: 20px; }
+    .corner-info.top-right { right: 20px; }
+    .corner-info.bottom-left { left: 20px; }
+    .corner-info.bottom-right { right: 20px; }
+    .subtitle-text { font-size: 10px; letter-spacing: 3px; }
+    .logo-ring { width: 220px; height: 220px; }
 }
 
 @media (max-width: 480px) {
     .logo { font-size: 38px; letter-spacing: 3px; }
-    .loading-label { font-size: 11px; letter-spacing: 2px; }
-    .loading-percentage { font-size: 18px; }
+    .loading-label { font-size: 10px; letter-spacing: 3px; }
+    .loading-percentage { font-size: 16px; }
+    .logo-subtitle { display: none; }
 }
