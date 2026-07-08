@@ -1,134 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NECROGRAD — Loading</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 <body>
-
-    <!-- GIF Background with independent camera movement -->
-    <div class="gif-background" id="gifBg">
-        <img src="bg.gif" alt="background">
-        <div class="gif-overlay"></div>
+    <div class="gif-background">
+        <img src="background.gif" alt="bg">
     </div>
 
-    <!-- Film grain overlay -->
-    <div class="film-grain"></div>
-
-    <!-- Cinematic bars -->
-    <div class="cinematic-bar cinematic-bar-top"></div>
-    <div class="cinematic-bar cinematic-bar-bottom"></div>
-
-    <!-- Vignette -->
-    <div class="vignette"></div>
-
-    <!-- Floating particles -->
-    <canvas id="particles"></canvas>
-
-    <!-- Main container -->
     <div class="container">
-
-        <!-- Top-left corner info -->
-        <div class="corner-info top-left">
-            <div class="corner-line"></div>
-            <span class="corner-text">NECROGRAD STUDIOS</span>
-            <span class="corner-sub">BUILD 2847.1 // INTERNAL</span>
-        </div>
-
-        <!-- Top-right corner -->
-        <div class="corner-info top-right">
-            <span class="corner-text" id="clockDisplay">00:00:00</span>
-            <span class="corner-sub" id="dateDisplay">2025.01.01</span>
-            <div class="corner-line right"></div>
-        </div>
-
-        <!-- Center logo area -->
         <div class="main-content">
-            <div class="logo-section">
-                <div class="logo-glow" id="logoGlow"></div>
-
-                <!-- Rotating ring behind logo -->
-                <div class="logo-ring" id="logoRing">
-                    <svg viewBox="0 0 300 300">
-                        <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(77,138,255,0.1)" stroke-width="0.5"/>
-                        <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(255,70,85,0.08)" stroke-width="0.5" stroke-dasharray="5 15"/>
-                        <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(168,85,247,0.06)" stroke-width="0.5" stroke-dasharray="2 20"/>
-                    </svg>
-                </div>
-
-                <div class="logo-wrapper" id="logoWrapper">
-                    <div class="logo">
-                        <span class="logo-text" id="logoLeft">NECRO</span><span class="logo-text accent" id="logoRight">GRAD</span>
-                    </div>
-                    <div class="logo-subtitle">
-                        <span class="subtitle-dash">———</span>
-                        <span class="subtitle-text">WELCOME TO THE DARK SIDE</span>
-                        <span class="subtitle-dash">———</span>
-                    </div>
-                </div>
+            <div class="logo">
+                <span class="logo-text">hecrograd</span>
             </div>
         </div>
 
-        <!-- Bottom loading section (GTA V style) -->
         <div class="footer">
-            <!-- Tip / flavor text area -->
-            <div class="tip-section" id="tipSection">
-                <div class="tip-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                </div>
-                <p class="tip-text" id="tipText">Exploring the depths of Necrograd...</p>
-            </div>
-
-            <!-- Loading bar -->
             <div class="loading-section">
                 <div class="loading-top">
-                    <span class="loading-label">LOADING</span>
-                    <span class="loading-percentage" id="loadPct">0%</span>
+                    <div class="loading-label">loading</div>
+                    <div class="loading-percentage">75%</div>
                 </div>
+
                 <div class="progress-container">
-                    <div class="progress-bar" id="progressBar">
+                    <div class="progress-bar" style="width: 75%;">
                         <div class="progress-glow"></div>
-                        <div class="progress-stripes"></div>
-                    </div>
-                    <div class="progress-segments">
-                        <div class="segment-mark" style="left:25%"></div>
-                        <div class="segment-mark" style="left:50%"></div>
-                        <div class="segment-mark" style="left:75%"></div>
                     </div>
                 </div>
+
                 <div class="loading-bottom">
-                    <span class="loading-status" id="loadStatus">Initializing systems...</span>
-                    <span class="loading-spinner">
-                        <span class="spinner-dot"></span>
-                        <span class="spinner-dot"></span>
-                        <span class="spinner-dot"></span>
-                    </span>
+                    <div class="loading-status">initializing</div>
+                    <div class="loading-spinner">
+                        <div class="spinner-dot"></div>
+                        <div class="spinner-dot"></div>
+                        <div class="spinner-dot"></div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Bottom-left -->
-        <div class="corner-info bottom-left">
-            <div class="social-icons">
-                <span class="social-tag">DISC: NECROGRAD</span>
-                <span class="social-divider">|</span>
-                <span class="social-tag">VK: NECROGRAD</span>
-            </div>
-        </div>
-
-        <!-- Bottom-right -->
-        <div class="corner-info bottom-right">
-            <span class="version-tag">v2.4.7</span>
-        </div>
-
     </div>
-
-    <script src="script.js"></script>
 </body>
-</html>
