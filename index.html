@@ -22,7 +22,7 @@
         :root {
             --bg-darker: #050810;
             --text-primary: #ffffff;
-            --glow-blue: rgba(77, 138, 255, 0.5);
+            --glow-blue: rgba(77, 138, 255, 0.45);
         }
 
         body {
@@ -35,7 +35,7 @@
             position: relative;
         }
 
-        /* ===== GIF BACKGROUND FULLSCREEN ===== */
+        /* ===== GIF BACKGROUND ===== */
         .gif-background {
             position: fixed;
             inset: 0;
@@ -43,6 +43,8 @@
             height: 100vh;
             z-index: 0;
             overflow: hidden;
+            transform: scale(1.05);
+            will-change: transform;
         }
 
         .gif-background img {
@@ -50,14 +52,16 @@
             height: 100%;
             object-fit: cover;
             filter: brightness(0.55) contrast(1.15) saturate(0.85);
+            will-change: filter;
         }
 
-        /* Лёгкое затемнение, чтобы текст читался */
         .gif-background::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: rgba(5, 8, 16, 0.18);
+            background:
+                radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.35) 100%),
+                rgba(5, 8, 16, 0.12);
             pointer-events: none;
         }
 
@@ -73,38 +77,60 @@
             padding: 20px;
         }
 
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
+            will-change: transform;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 650px;
+            height: 300px;
+            background: radial-gradient(
+                ellipse,
+                rgba(77, 138, 255, 0.18) 0%,
+                rgba(77, 138, 255, 0.08) 35%,
+                transparent 75%
+            );
+            filter: blur(60px);
+            opacity: 0.35;
+            pointer-events: none;
+            will-change: opacity, transform;
+        }
+
         .logo {
+            position: relative;
+            z-index: 2;
             font-size: 120px;
             letter-spacing: 14px;
             text-transform: uppercase;
             text-align: center;
             line-height: 1;
-            text-shadow: 0 0 25px var(--glow-blue);
-            animation: logoPulse 3s ease-in-out infinite;
+            will-change: transform;
         }
 
         .logo-text {
+            display: inline-block;
             background: linear-gradient(180deg, #ffffff 0%, #d9deea 45%, #8b93ac 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        @keyframes logoPulse {
-            0%, 100% {
-                transform: scale(1);
-                filter: drop-shadow(0 0 20px rgba(77, 138, 255, 0.15));
-            }
-            50% {
-                transform: scale(1.02);
-                filter: drop-shadow(0 0 35px rgba(77, 138, 255, 0.35));
-            }
+            filter: drop-shadow(0 0 24px rgba(77, 138, 255, 0.25));
         }
 
         @media (max-width: 768px) {
             .logo {
                 font-size: 58px;
                 letter-spacing: 8px;
+            }
+
+            .logo-glow {
+                width: 320px;
+                height: 180px;
             }
         }
 
@@ -124,14 +150,17 @@
     </audio>
 
     <!-- GIF BACKGROUND -->
-    <div class="gif-background">
-        <img src="background.gif" alt="background">
+    <div class="gif-background" id="gif-bg-wrap">
+        <img id="gif-bg" src="background.gif" alt="background">
     </div>
 
     <!-- LOGO -->
     <div class="container">
-        <div class="logo">
-            <span class="logo-text">hecrograd</span>
+        <div class="logo-wrapper" id="logo-wrapper">
+            <div class="logo-glow" id="logo-glow"></div>
+            <div class="logo">
+                <span class="logo-text">hecrograd</span>
+            </div>
         </div>
     </div>
 
@@ -142,6 +171,113 @@
         window.addEventListener('load', () => {
             bgMusic.play().catch(() => {});
         });
+
+        const logoWrapper = document.getElementById('logo-wrapper');
+        const logo = logoWrapper.querySelector('.logo');
+        const glowEl = document.getElementById('logo-glow');
+        const gifBgWrap = document.getElementById('gif-bg-wrap');
+        const gifImg = document.getElementById('gif-bg');
+
+        const beatDuration = 300;
+        const beatPause = 200;
+
+        let direction = 1;
+        let logoBeatActive = false;
+        let gifBeatActive = false;
+
+        function doLogoBeat() {
+            if (logoBeatActive) return;
+            logoBeatActive = true;
+
+            const startTime = performance.now();
+
+            function animate(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(elapsed / beatDuration, 1);
+
+                let ease;
+                if (t < 0.4) {
+                    ease = t / 0.4;
+                } else {
+                    ease = 1 - ((t - 0.4) / 0.6);
+                }
+
+                const moveY = 18 * ease;
+                const scaleVal = 1 + 0.06 * ease;
+
+                logo.style.transform = `translateY(${moveY}px) scale(${scaleVal})`;
+
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    logo.style.transform = 'translateY(0px) scale(1)';
+                    logoBeatActive = false;
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function doGifBeat() {
+            if (gifBeatActive) return;
+            gifBeatActive = true;
+
+            const dir = direction;
+            direction *= -1;
+
+            const startTime = performance.now();
+
+            function animate(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(elapsed / beatDuration, 1);
+
+                let ease;
+                if (t < 0.4) {
+                    ease = t / 0.4;
+                } else {
+                    ease = 1 - ((t - 0.4) / 0.6);
+                }
+
+                const rotateY = dir * 3 * ease;
+                const rotateX = 2 * ease;
+                const scaleGif = 1.05 + 0.03 * ease;
+                const brightness = 0.55 + 0.08 * ease;
+
+                gifBgWrap.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scaleGif})`;
+                gifImg.style.filter = `brightness(${brightness}) contrast(1.15) saturate(0.85)`;
+
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    gifBgWrap.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1.05)';
+                    gifImg.style.filter = 'brightness(0.55) contrast(1.15) saturate(0.85)';
+                    gifBeatActive = false;
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function pulseGlow() {
+            glowEl.style.transition = 'none';
+            glowEl.style.opacity = '0.75';
+            glowEl.style.transform = 'translate(-50%, -50%) scale(1.04)';
+
+            setTimeout(() => {
+                glowEl.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                glowEl.style.opacity = '0.35';
+                glowEl.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 60);
+        }
+
+        function beatLoop() {
+            doLogoBeat();
+            doGifBeat();
+            pulseGlow();
+            setTimeout(beatLoop, beatDuration + beatPause);
+        }
+
+        setTimeout(beatLoop, 1000);
     </script>
 </body>
 </html>
