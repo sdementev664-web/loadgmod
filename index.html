@@ -109,6 +109,38 @@
             filter: drop-shadow(0 0 24px rgba(77, 138, 255, 0.25));
         }
 
+        /* ===== CLICK TO PLAY OVERLAY ===== */
+        .click-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: rgba(5, 8, 16, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+
+        .click-overlay span {
+            font-family: 'Kenyan Coffee', sans-serif;
+            font-size: 32px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .click-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             .logo {
                 font-size: 58px;
@@ -118,6 +150,10 @@
             .logo-glow {
                 width: 320px;
                 height: 180px;
+            }
+
+            .click-overlay span {
+                font-size: 20px;
             }
         }
 
@@ -130,10 +166,23 @@
     </style>
 </head>
 <body>
+
+    <!-- CLICK TO START (browsers block autoplay without interaction) -->
+    <div class="click-overlay" id="click-overlay">
+        <span>click to enter</span>
+    </div>
+
+    <!-- MUSIC -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="./music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- GIF BACKGROUND -->
     <div class="gif-background">
         <img src="./background.gif" alt="background">
     </div>
 
+    <!-- LOGO -->
     <div class="container">
         <div class="logo-wrapper">
             <div class="logo-glow"></div>
@@ -142,5 +191,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const overlay = document.getElementById('click-overlay');
+        const music = document.getElementById('bg-music');
+        music.volume = 0.5;
+
+        // Browsers block autoplay without user interaction
+        // So we show "click to enter" overlay
+        overlay.addEventListener('click', () => {
+            music.play();
+            overlay.classList.add('hidden');
+        });
+
+        // Also try autoplay on any first interaction
+        document.addEventListener('keydown', () => {
+            if (music.paused) {
+                music.play();
+                overlay.classList.add('hidden');
+            }
+        }, { once: true });
+    </script>
 </body>
 </html>
