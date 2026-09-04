@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,46 +29,48 @@
             position: relative;
         }
 
-        /* Черные прямоугольники (плашки) сверху и снизу */
+        /* Черные прямоугольники сверху и снизу (кинематографичные рамки) */
         .top-bar, .bottom-bar {
             position: fixed;
             left: 0;
             width: 100%;
-            height: 80px;
+            height: 80px; /* Высота рамок */
             background-color: #000000;
             z-index: 10;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.95);
         }
 
         .top-bar {
             top: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(77, 138, 255, 0.08); /* Тонкая неоновая линия под цвет логотипа */
         }
 
         .bottom-bar {
             bottom: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(77, 138, 255, 0.08);
             display: flex;
             align-items: center;
-            padding-left: 30px;
+            padding-left: 30px; /* Отступ кружка от левого края */
         }
 
-        /* Крутящийся кружок */
+        /* Светящийся крутящийся кружок */
         .spinning-circle {
             width: 28px;
             height: 28px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #4d8aff;
+            border: 3px solid rgba(255, 255, 255, 0.05);
+            border-top: 3px solid #4d8aff; /* Сине-голубой цвет под свечение логотипа */
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            box-shadow: 0 0 10px rgba(77, 138, 255, 0.3);
+            filter: drop-shadow(0 0 8px rgba(77, 138, 255, 0.8));
         }
 
+        /* Анимация кружения */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
+        /* Задний фон (GIF) */
         .gif-background {
             position: fixed;
             inset: 0;
@@ -96,6 +98,7 @@
             pointer-events: none;
         }
 
+        /* Главный контейнер с логотипом */
         .container {
             position: relative;
             z-index: 2;
@@ -149,36 +152,58 @@
             filter: drop-shadow(0 0 24px rgba(77, 138, 255, 0.25));
         }
 
+        /* Адаптация под мобильные устройства и разные экраны */
         @media (max-width: 768px) {
-            .top-bar, .bottom-bar { height: 60px; }
-            .bottom-bar { padding-left: 20px; }
-            .spinning-circle { width: 22px; height: 22px; border-width: 2px; }
-            .logo { font-size: 58px; letter-spacing: 5px; }
-            .logo-glow { width: 320px; height: 180px; }
+            .top-bar, .bottom-bar {
+                height: 60px;
+            }
+            .bottom-bar {
+                padding-left: 20px;
+            }
+            .spinning-circle {
+                width: 22px;
+                height: 22px;
+                border-width: 2px;
+            }
+            .logo {
+                font-size: 58px;
+                letter-spacing: 5px;
+            }
+            .logo-glow {
+                width: 320px;
+                height: 180px;
+            }
         }
 
         @media (max-width: 480px) {
-            .logo { font-size: 36px; letter-spacing: 3px; }
+            .logo {
+                font-size: 36px;
+                letter-spacing: 3px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Тег audio настроен под автозапуск -->
+    <!-- Тег аудио для музыки -->
     <audio id="bg-music" autoplay loop preload="auto">
         <source src="./music.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Верхний прямоугольник -->
     <div class="top-bar"></div>
 
+    <!-- Нижний прямоугольник с крутящимся кругом внутри -->
     <div class="bottom-bar">
         <div class="spinning-circle"></div>
     </div>
 
+    <!-- Задний фон -->
     <div class="gif-background">
         <img src="./background.gif" alt="background">
     </div>
 
+    <!-- Логотип -->
     <div class="container">
         <div class="logo-wrapper">
             <div class="logo-glow"></div>
@@ -190,55 +215,65 @@
 
     <script>
         const music = document.getElementById('bg-music');
-        let defaultVolume = 0.4; // Громкость по умолчанию (от 0.0 до 1.0)
-        music.volume = defaultVolume;
+        
+        // Установи громкость (от 0.0 до 1.0)
+        let targetVolume = 0.4; 
+        music.volume = targetVolume;
 
+        // Функция принудительного запуска воспроизведения
         function playMusic() {
             if (music.paused) {
                 const playPromise = music.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(function(error) {
-                        console.log("Ожидание сигнала от GMod для запуска звука...");
+                        console.log("Ожидание активности для запуска музыки...");
                     });
                 }
             }
         }
 
-        // --- СПЕЦИАЛЬНЫЕ ФУНКЦИИ ДЛЯ GARRY'S MOD ---
-        // GMod автоматически вызывает GameDetails при подключении к серверу
+        // =========================================================
+        // ИНТЕГРАЦИЯ С ДВИЖКОМ GARRYS MOD (CEF Chromium)
+        // Эти функции автоматически вызываются игрой при загрузке
+        // =========================================================
+        
+        // Вызывается в самом начале подключения к серверу
         window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
-            if (volume && volume > 0) {
-                music.volume = volume; // Устанавливает громкость из настроек GMod игрока
+            // Если в настройках GMod у игрока убавлен звук, подстраиваемся под него
+            if (volume !== undefined && volume > 0) {
+                music.volume = volume;
+            } else {
+                music.volume = targetVolume;
             }
             playMusic();
         };
 
-        // Вызывается при загрузке файлов карты
+        // Вызывается при скачивании файлов аддонов/карты
         window.DownloadingFile = function(fileName) {
             playMusic();
         };
 
-        // Вызывается при изменении статуса загрузки
+        // Вызывается при изменении статуса загрузки (например, "Sending client info...")
         window.SetStatusChanged = function(status) {
             playMusic();
         };
 
-        // Запуск при открытии страницы и повторные попытки (если браузер блокировал)
+        // Циклическая проверка для обхода блокировки звука браузером
         window.addEventListener('load', function() {
             playMusic();
-            const autoPlayInterval = setInterval(function() {
+            const forcePlayInterval = setInterval(function() {
                 if (!music.paused) {
-                    clearInterval(autoPlayInterval);
+                    clearInterval(forcePlayInterval); // Если музыка успешно заиграла, выключаем цикл
                 } else {
-                    playMusic();
+                    playMusic(); // Пробуем запустить снова
                 }
-            }, 250);
+            }, 200);
         });
 
-        // Резервный вариант на случай тестирования через обычный браузер
-        document.addEventListener('click', playMusic);
-        document.addEventListener('mousemove', playMusic);
-        document.addEventListener('keydown', playMusic);
+        // Резервные триггеры на случай запуска в обычном браузере
+        document.addEventListener('click', playMusic, { once: true });
+        document.addEventListener('mousemove', playMusic, { once: true });
+        document.addEventListener('keydown', playMusic, { once: true });
     </script>
 </body>
 </html>
