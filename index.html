@@ -29,6 +29,51 @@
             position: relative;
         }
 
+        /* Черные прямоугольники (плашки) сверху и снизу */
+        .top-bar, .bottom-bar {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 80px; /* Высота прямоугольников */
+            background-color: #000000;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .top-bar {
+            top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bottom-bar {
+            bottom: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            padding-left: 30px; /* Отступ кружка от левого края */
+        }
+
+        /* Крутящийся кружок */
+        .spinning-circle {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4d8aff; /* Цвет крутящейся части (под цвет свечения логотипа) */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 10px rgba(77, 138, 255, 0.3);
+        }
+
+        /* Анимация вращения */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .gif-background {
             position: fixed;
             inset: 0;
@@ -109,12 +154,23 @@
             filter: drop-shadow(0 0 24px rgba(77, 138, 255, 0.25));
         }
 
+        /* Адаптивность под мобильные устройства */
         @media (max-width: 768px) {
+            .top-bar, .bottom-bar {
+                height: 60px; /* Чуть уменьшаем высоту плашек на мобильных */
+            }
+            .bottom-bar {
+                padding-left: 20px;
+            }
+            .spinning-circle {
+                width: 22px;
+                height: 22px;
+                border-width: 2px;
+            }
             .logo {
                 font-size: 58px;
                 letter-spacing: 5px;
             }
-
             .logo-glow {
                 width: 320px;
                 height: 180px;
@@ -134,6 +190,14 @@
     <audio id="bg-music" loop preload="auto">
         <source src="./music.mp3" type="audio/mpeg">
     </audio>
+
+    <!-- Верхний прямоугольник -->
+    <div class="top-bar"></div>
+
+    <!-- Нижний прямоугольник с крутящимся кружком внутри -->
+    <div class="bottom-bar">
+        <div class="spinning-circle"></div>
+    </div>
 
     <div class="gif-background">
         <img src="./background.gif" alt="background">
